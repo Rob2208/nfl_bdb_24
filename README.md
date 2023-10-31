@@ -1,5 +1,5 @@
-# NFL Big Data BOWL 2024
+# NFL Big Data Bowl 2024
 
 Measuring tackle value;
 
-First step, download NFL BDB24 data from Kaggle and put in into a folder data/nfl-big-data-bowl-2024
+First step, download NFL BDB 24 data from Kaggle and put in into the folder "data/nfl-big-data-bowl-2024".
