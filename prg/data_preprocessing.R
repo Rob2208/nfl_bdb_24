@@ -66,11 +66,14 @@ tracking_pairs <- tackle_tracking %>%
 
 rel_frames <- tracking_pairs %>%
   group_by(uId_player_tackler) %>%
-  summarize(min_dist = min(dist), uId_frame = uId_frame[which.min(dist)])
+  summarize(min_dist = min(dist), uId_frame = uId_frame[which.min(dist)],
+            tacklerId = nflId_tackler[which.min(dist)])
 
 ft_needed <- full_tracking %>%
   mutate(uId_frame = paste(uId,frameId,sep = "_")) %>%
-  filter(uId_frame %in% rel_ids$uId_frame)
+  filter(uId_frame %in% rel_frames$uId_frame) %>%
+  left_join(rel_frames %>% select(uId_frame,tacklerId), by = "uId_frame") %>%
+  mutate(is_tackler = ifelse(nflId == tacklerId,1,0))
 
 saveRDS(ft_needed,"data/tackle_frames_tracking.rds")
 
