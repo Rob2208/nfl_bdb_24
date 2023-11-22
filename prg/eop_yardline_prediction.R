@@ -7,6 +7,8 @@ library(randomForest)
 
 # Load data ---------------------------------------------------------------
 
+
+# you also have to change this, as the data is not in the repo.
 games = read.csv("data/games.csv")
 plays = read.csv("data/plays.csv")
 tackles = read.csv("data/tackles.csv")
@@ -219,7 +221,7 @@ trackingWidenew$yards_gained = trackingWidenew$x_bc - trackingWidenew$eop_yardli
 
 ## Instead of this stuff, you can just do 
 
-trackingWidenew = readRDS("data/trackingWide_ordered2.rds")
+# trackingWidenew = readRDS("data/trackingWide_ordered2.rds")
 
 
 
@@ -235,16 +237,16 @@ colnames(x_train)
 
 x_train_scaled = as.data.frame(scale(x_train))
 
-n_train = 70000
+n_train = 70000 # my RAM would not allow more
 na.inds = apply(is.na(x_train_scaled[1:n_train,]), 1, sum)
 na.inds = which(na.inds > 0)
 na.inds = as.numeric(na.inds)
 train.ind = setdiff(1:n_train, na.inds)
 
-# mod = randomForest(trackingWidenew$yards_gained[train.ind] ~., data = x_train_scaled[train.ind,], ntree = 1000)
+mod = randomForest(trackingWidenew$yards_gained[train.ind] ~., data = x_train_scaled[train.ind,], ntree = 1000)
 # saveRDS(mod, "mod70K.rds")
 
-mod = readRDS("mod70K.rds")
+# mod = readRDS("mod70K.rds")
 
 # RMSE out of sample (this takes time!)
 errors = trackingWidenew$yards_gained[70001:nrow(x_train_scaled)]-
@@ -327,10 +329,10 @@ train.ind = setdiff(1:n_train, na.inds) # exclude NAs
 trackingWideMissed = trackingWidenew %>% 
   filter(gameplayId %in% missed_gameplayIds) 
 
-# mod_missed = randomForest(trackingWideMissed$yards_gained[train.ind] ~., data = x_train_missed_scaled[train.ind,], ntree = 1000)
+mod_missed = randomForest(trackingWideMissed$yards_gained[train.ind] ~., data = x_train_missed_scaled[train.ind,], ntree = 1000)
 # saveRDS(mod_missed, "mod_missed.rds")
 
-mod_missed = readRDS("mod_missed.rds")
+# mod_missed = readRDS("mod_missed.rds")
 
 pred_missed = predict(mod_missed, x_train_missed_scaled[60001:nrow(x_train_missed_scaled),]) # point predictions
 
