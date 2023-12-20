@@ -1,0 +1,61 @@
+---
+title: "TER: A metric for evaluating the importance of tackles"
+author: "Robert Bajons, Jan-Ole Koslik, Rouven Michels, Marius Ötting"
+date: "`r format(Sys.time(), '%d/%m/%y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+> "Football is two things. It's blocking and tackling."
+
+> *Vince Lombardi*
+
+## Introduction
+
+Although this citation dates back several decades --- and American Football has of course changed since then --- tackling remains an integral aspect of the game. In contrast to decision-making scenarios faced by players, such as a quarterback's selection of a target for a pass, the decision for a tackle is more straightforward: a defense player should always promptly tackle the ball carrier.
+
+When assessing players' tackles, one is usually interested in a hypothetical scenario: the potential outcome if a player were to miss a tackle. 
+Essentially, this involves quantifying the yards saved by a defensive player. Ideally, albeit impractically, running a play twice --- once with the defense player executing the tackle and a second time without --- would allow a direct comparison of the yardage gained by the ball carrier, thus enabling to evaluate the impact of the defensive player's tackle.
+
+
+Given the impracticability of such a hypothetical scenario, our approach involves approximating it by predicting the yardline of the ongoing play twice. First, we consider the inclusion of the closest defender who executed the tackle, and in a next step, we exclude this player. Based on these predicted yardlines, we compute the expected points (EP) gained through the tackle. This approach enables us to evaluate players in terms of the importance of their tacklings.
+
+
+## Analysis
+
+### Example play
+
+...add an example play to illustrate the "what if" scenario...
+
+### Methods
+
+Our analysis comprises three steps:
+
+1. Model Training: We train a model designed to predict the end-of-play yardline. The model uses features derived solely from the distances to the ball carrier of the 10 nearest defenders. To account for potential non-linear and interaction effects, we consider a random forest comprising 1000 individual trees.
+
+2. Tackler Replacement Procedure: For each tackle, we systematically remove the closest defender at the tackle moment and replaced them with the second closest (and so forth). 
+
+3. Tackle Evaluation: The evaluation of tackles involves the use of an EP model with the following features: .... Using our random forest, we predict the end-of-play yardline across the 1000 trees and consider these predictions as inputs for the EP model. Next, we calculate the EPs for all 1000 predictions and average the outcomes. This process yields the tackle's value, denoting the points gained, with the respective tackler excluded from the data set.
+
+
+## Metrics
+
+### Fancy name for our metric?
+
+- TER: tackle efficiency rating
+
+- PGT: Points gained by tackle
+
+### Player evaluation
+
+## Discussion
+
+- potential drawback: cornerbacks/safeties are more likely to have a high value, because they are more likely to make "important" tackles. But that does not necessarily imply that these players make better tackles
+
+## Code
+
+...link to GitHub...
+
