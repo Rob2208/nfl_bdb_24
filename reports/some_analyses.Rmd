@@ -16,11 +16,12 @@ library(reactablefmtr)
 library(RCurl)
 library(htmltools)
 library(crosstalk)
+library(plotrix)
 
 pbp_data_bdb <- read.csv("../data/nfl-big-data-bowl-2024/plays.csv") %>% 
   mutate(uId = paste(gameId,playId,sep = "_"))
 
-tackle_list <- readRDS("../data/tackles_info_data.rds")
+tackle_list <- readRDS("../data/tackles_info_data_trw1-3.rds")
 
 tackles <- tackle_list[[1]]
 tackle_info_real2 <- tackle_list[[2]]
@@ -119,7 +120,7 @@ vis_tackle_plays <- function(gpId){
 ```{r real_tackle, echo = FALSE}
 
 rt_tbl <- reactable(tackle_info_real2 %>% 
-                      select(-gameplayId,-uId,-absoluteYardlineNumber),
+                      select(-gameplayId,-uId),
                     bordered = TRUE,
                     
                     columns = list(
@@ -443,6 +444,439 @@ gpId <- 20220925061332
 vis_tackle_plays(gpId)
 ```
 
+## Visualisations new {.tabset}
+
+**Welche Plot Variante bevorzugt ihr?** :-) 
+
+*Anmerkung: ein paar Kleinigkeiten (e.g. Beschriftung) muss noch angepasst werden.*
+
+### Variante 1 
+
+```{r plot_new1, fig.height=8, fig.width= 14, echo = FALSE}
+
+vis_tackle_plays <- function(gpId){
+  tackle_frame <- tackles %>% filter(gameplayId == gpId)
+  tackle_info <- tackle_info_real2 %>% filter(gameplayId == gpId)
+  pred_r <- tackle_pred_real[which(tackle_info_real2$gameplayId == gpId),]
+  pred_s <- tackle_pred_s[which(tackle_info_simple2$gameplayId == gpId),]
+  
+  par(mfrow = c(2,2), mar = c(4, 4, 0.5, 2) + 0.1)
+  
+  ########################
+  ### real play and pred
+  
+  plot(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = "blue", xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)), ylim = c(-53.3/2, 53.3/2), xlab = "x", ylab = "y")
+  segments(x0 = 1:20 *5,
+           y0 = 53.3/2,
+           x1 = 1:20 *5,
+           y1 = -53.3/2,
+           col = "lightgray", lwd = 0.5)
+  segments(x0 = c(0,0),
+           y0 = c(53.3/2,-53.3/2),
+           x1 = c(100,100),
+           y1 = c(53.3/2,-53.3/2),
+           lwd = 1.5)
+  
+  segments(x0 = tackle_info$yardline_100,
+           y0 = 53.3/2,
+           x1 = tackle_info$yardline_100,
+           y1 = -53.3/2,
+           col = "purple",lty = 2)
+  #abline(v = tackle_info$yardline_100, col = "purple",lty = 2) # line of scrimmage
+  
+  segments(x0 = 0,
+           y0 = 53.3/2,
+           x1 = 0,
+           y1 = -53.3/2,
+           lwd = 1.5)
+  #abline(v = 0, lwd = 1.5) # endzone
+  
+  segments(x0 = tackle_info$true_yardline,
+           y0 = 53.3/2,
+           x1 = tackle_info$true_yardline,
+           y1 = -53.3/2,
+           col = "darkgreen",lty = 2)
+  
+  # plot predicted yard end yard line
+  for(j in 1:1000){
+    segments(x0 = tackle_frame$x_bc-pred_r[j],
+             y0 = 53.3/2,
+             x1 = tackle_frame$x_bc-pred_r[j],
+             y1 = -53.3/2,
+             lwd = 2, col = alpha("chartreuse1", 0.01))
+    #abline(v = tackle_frame$x_bc-pred_r[j], lwd = 2, col = alpha("chartreuse1", 0.01))
+  }
+  segments(x0 = tackle_frame$x_bc - mean(pred_r),
+           y0 = 53.3/2,
+           x1 = tackle_frame$x_bc - mean(pred_r),
+           y1 = -53.3/2,
+           col = 1, lwd = 2)
+  #abline(v = tackle_frame$x_bc - mean(pred_r), col = 1, lwd = 2) # expected eop yardline
+  segments(x0 = tackle_frame$x_bc - mean(pred_r),
+           y0 = 53.3/2,
+           x1 = tackle_frame$x_bc - mean(pred_r),
+           y1 = -53.3/2,
+           col = "chartreuse1", lwd = 1)
+  #abline(v = tackle_frame$x_bc - mean(pred_r), col = "chartreuse1", lwd = 1) # expected eop yardline
+  
+  points(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = "blue")
+  points(tackle_frame$x_bc, tackle_frame$y_bc, pch = 16, col = "blue")
+  
+  for(j in 2:11){
+    points(tackle_frame[,paste0("x_or_off", j)], tackle_frame[, paste0("y_or_off", j)], pch = 20, col = "blue")
+  }
+  for(j in 1:10){
+    points(tackle_frame[,paste0("x_or_def", j)], tackle_frame[, paste0("y_or_def", j)], pch = 20, col = "red")
+  }
+  #points(trackingsub$x_football[i], trackingsub$y_football[i], pch = 9, col = "coral1", lwd = 2)
+  
+  plot(density(tackle_frame$x_bc-pred_r, bw = 2.5), col = "chartreuse1", lwd = 2, xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)), bty = "n", main = "", xlab = "eop yardline")
+  abline(v = 1:20 *5, col = "lightgray", lwd = 0.5)
+  abline(v = tackle_info$yardline_100, col = "purple",lty = 2)
+  abline(v = 0, lwd = 1.5) # endzone
+  abline(v = tackle_frame$x_bc - mean(pred_r), col = 1, lwd = 2)
+  abline(v = tackle_frame$x_bc - mean(pred_r), col = "chartreuse1", lwd = 1)
+  abline(v = tackle_info$true_yardline, col = "darkgreen",lty = 2)
+  
+  ########################
+  ### hypothetical play and pred (without closest def)
+  
+  plot(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = "blue", xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)), ylim = c(-53.3/2, 53.3/2), xlab = "x", ylab = "y")
+  segments(x0 = 1:20 *5,
+           y0 = 53.3/2,
+           x1 = 1:20 *5,
+           y1 = -53.3/2,
+           col = "lightgray", lwd = 0.5)
+  segments(x0 = c(0,0),
+           y0 = c(53.3/2,-53.3/2),
+           x1 = c(100,100),
+           y1 = c(53.3/2,-53.3/2),
+           lwd = 1.5)
+  
+  segments(x0 = tackle_info$yardline_100,
+           y0 = 53.3/2,
+           x1 = tackle_info$yardline_100,
+           y1 = -53.3/2,
+           col = "purple",lty = 2)
+  #abline(v = tackle_info$yardline_100, col = "purple",lty = 2) # line of scrimmage
+  
+  segments(x0 = 0,
+           y0 = 53.3/2,
+           x1 = 0,
+           y1 = -53.3/2,
+           lwd = 1.5)
+  #abline(v = 0, lwd = 1.5) # endzone
+  
+  segments(x0 = tackle_info$true_yardline,
+           y0 = 53.3/2,
+           x1 = tackle_info$true_yardline,
+           y1 = -53.3/2,
+           col = "darkgreen",lty = 2)
+  
+  # plot predicted yard end yard line
+  for(j in 1:1000){
+    segments(x0 = tackle_frame$x_bc-pred_s[j],
+             y0 = 53.3/2,
+             x1 = tackle_frame$x_bc-pred_s[j],
+             y1 = -53.3/2,
+             lwd = 2, col = alpha("chartreuse1", 0.01))
+    #abline(v = tackle_frame$x_bc-pred_s[j], lwd = 2, col = alpha("chartreuse1", 0.01))
+  }
+  segments(x0 = tackle_frame$x_bc - mean(pred_s),
+           y0 = 53.3/2,
+           x1 = tackle_frame$x_bc - mean(pred_s),
+           y1 = -53.3/2,
+           col = 1, lwd = 2)
+  #abline(v = tackle_frame$x_bc - mean(pred_s), col = 1, lwd = 2) # expected eop yardline
+  segments(x0 = tackle_frame$x_bc - mean(pred_s),
+           y0 = 53.3/2,
+           x1 = tackle_frame$x_bc - mean(pred_s),
+           y1 = -53.3/2,
+           col = "chartreuse1", lwd = 1)
+  #abline(v = tackle_frame$x_bc - mean(pred_s), col = "chartreuse1", lwd = 1) # expected eop yardline
+  
+  points(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = "blue")
+  points(tackle_frame$x_bc, tackle_frame$y_bc, pch = 16, col = "blue")
+  
+  for(j in 2:11){
+    points(tackle_frame[,paste0("x_or_off", j)], tackle_frame[, paste0("y_or_off", j)], pch = 20, col = "blue")
+  }
+  for(j in 1:10){
+    points(tackle_frame[,paste0("x_or_def", j+1)], tackle_frame[, paste0("y_or_def", j+1)], pch = 20, col = "red")
+  }
+  #points(trackingsub$x_football[i], trackingsub$y_football[i], pch = 9, col = "coral1", lwd = 2)
+  
+  plot(density(tackle_frame$x_bc-pred_s, bw = 2.5), col = "chartreuse1", lwd = 2, xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)), bty = "n", main = "", xlab = "eop yardline")
+  abline(v = 1:20 *5, col = "lightgray", lwd = 0.5)
+  abline(v = tackle_info$yardline_100, col = "purple",lty = 2)
+  abline(v = 0, lwd = 1.5) # endzone
+  abline(v = tackle_frame$x_bc - mean(pred_s), col = 1, lwd = 2)
+  abline(v = tackle_frame$x_bc - mean(pred_s), col = "chartreuse1", lwd = 1)
+  abline(v = tackle_info$true_yardline, col = "darkgreen",lty = 2)
+  
+}
+
+gpId <- 20221006001726
+
+vis_tackle_plays(gpId)
+```
+
+
+### Variante 2 
+
+```{r plot_new2, fig.height=8, fig.width= 14, echo = FALSE}
+
+vis_tackle_plays2 <- function(gpId){
+  tackle_frame <- tackles %>% filter(gameplayId == gpId)
+  tackle_info <- tackle_info_real2 %>% filter(gameplayId == gpId)
+  pred_r <- tackle_pred_real[which(tackle_info_real2$gameplayId == gpId),]
+  pred_s <- tackle_pred_s[which(tackle_info_simple2$gameplayId == gpId),]
+  
+  par(mfrow = c(1,2), mar = c(4, 4, 0.5, 2) + 0.1)
+  
+  ########################
+  ### real play and pred
+  
+  twoord.plot(lx = tackle_frame$x_bc, ly = tackle_frame$y_bc,
+              rx = density(tackle_frame$x_bc-pred_r, bw = 2.5)$x,ry = density(tackle_frame$x_bc-pred_r, bw = 2.5)$y,
+              lylim = c(-(53.3/2*3)-5,53.3/2+5),
+              rylim = c(-max(density(tackle_frame$x_bc-pred_r, bw = 2.5)$y)/10,
+                        max(density(tackle_frame$x_bc-pred_r, bw = 2.5)$y)*2+ max(density(tackle_frame$x_bc-pred_r, bw = 2.5)$y)/5),
+              xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)),
+              lytickpos = seq(-20,20,by = 10),
+              rytickpos = round(seq(0,max(density(tackle_frame$x_bc-pred_r, bw = 2.5)$y),length.out = 5),3),
+              lcol = "blue",rcol = "chartreuse",type = "l", bty = "n",
+              axislab.cex = 0.7, main = "Real tackle frame predictions",
+              do.first = "abline(h = -(53.3/2*3),col = \"lightgrey\")")
+  
+  
+  points(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = "blue")
+  segments(x0 = 1:20 *5,
+          y0 = 53.3/2,
+          x1 = 1:20 *5,
+          y1 = -53.3/2,
+          col = "lightgray", lwd = 0.5)
+  segments(x0 = c(0,0),
+          y0 = c(53.3/2,-53.3/2),
+          x1 = c(100,100),
+          y1 = c(53.3/2,-53.3/2),
+          lwd = 1.5)
+  
+  segments(x0 = tackle_info$yardline_100,
+           y0 = 53.3/2,
+           x1 = tackle_info$yardline_100,
+           y1 = -53.3/2,
+           col = "purple",lty = 2)
+  #abline(v = tackle_info$yardline_100, col = "purple",lty = 2) # line of scrimmage
+  
+  segments(x0 = 0,
+           y0 = 53.3/2,
+           x1 = 0,
+           y1 = -53.3/2,
+           lwd = 1.5)
+  #abline(v = 0, lwd = 1.5) # endzone
+  
+  segments(x0 = tackle_info$true_yardline,
+           y0 = 53.3/2,
+           x1 = tackle_info$true_yardline,
+           y1 = -53.3/2,
+           col = "darkgreen",lty = 2)
+  #abline(v = tackle_info$true_yardline, col = "darkgreen",lty = 2) # true eop yardline
+  
+  # plot predicted yard end yard line
+  for(j in 1:1000){
+    segments(x0 = tackle_frame$x_bc-pred_r[j],
+             y0 = 53.3/2,
+             x1 = tackle_frame$x_bc-pred_r[j],
+             y1 = -53.3/2,
+             lwd = 2, col = alpha("chartreuse1", 0.01))
+    #abline(v = tackle_frame$x_bc-pred_r[j], lwd = 2, col = alpha("chartreuse1", 0.01))
+  }
+  segments(x0 = tackle_frame$x_bc - mean(pred_r),
+           y0 = 53.3/2,
+           x1 = tackle_frame$x_bc - mean(pred_r),
+           y1 = -53.3/2,
+           col = 1, lwd = 2)
+  #abline(v = tackle_frame$x_bc - mean(pred_r), col = 1, lwd = 2) # expected eop yardline
+  segments(x0 = tackle_frame$x_bc - mean(pred_r),
+           y0 = 53.3/2,
+           x1 = tackle_frame$x_bc - mean(pred_r),
+           y1 = -53.3/2,
+           col = "chartreuse1", lwd = 1)
+  #abline(v = tackle_frame$x_bc - mean(pred_r), col = "chartreuse1", lwd = 1) # expected eop yardline
+  
+  points(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = "blue")
+  points(tackle_frame$x_bc, tackle_frame$y_bc, pch = 16, col = "blue")
+  
+  for(j in 2:11){
+    points(tackle_frame[,paste0("x_or_off", j)], tackle_frame[, paste0("y_or_off", j)], pch = 20, col = "blue")
+  }
+  for(j in 1:10){
+    points(tackle_frame[,paste0("x_or_def", j)], tackle_frame[, paste0("y_or_def", j)], pch = 20, col = "red")
+  }
+  #points(trackingsub$x_football[i], trackingsub$y_football[i], pch = 9, col = "coral1", lwd = 2)
+  
+  segments(x0 = 1:20 *5,
+           y0 = -(53.3/2*3),
+           x1 = 1:20 *5,
+           y1 = -53.3/2-2,
+           col = "lightgray", lwd = 0.5)
+  
+  segments(x0 = tackle_info$yardline_100,
+           y0 = -(53.3/2*3),
+           x1 = tackle_info$yardline_100,
+           y1 = -53.3/2-2,
+           col = "purple",lty = 2)
+  
+  segments(x0 = 0,
+           y0 = -(53.3/2*3),
+           x1 = 0,
+           y1 = -53.3/2-4,
+           lwd = 1.5)
+  #abline(v = 0, lwd = 1.5) # endzone
+  
+  segments(x0 = tackle_frame$x_bc - mean(pred_r),
+           y0 = -(53.3/2*3),
+           x1 = tackle_frame$x_bc - mean(pred_r),
+           y1 = -53.3/2-4,
+           col = 1, lwd = 2)
+  #abline(v = tackle_frame$x_bc - mean(pred_r), col = 1, lwd = 2) # expected eop yardline
+  segments(x0 = tackle_frame$x_bc - mean(pred_r),
+           y0 = -(53.3/2*3),
+           x1 = tackle_frame$x_bc - mean(pred_r),
+           y1 = -53.3/2-4,
+           col = "chartreuse1", lwd = 1)
+  
+  segments(x0 = tackle_info$true_yardline,
+           y0 = -(53.3/2*3),
+           x1 = tackle_info$true_yardline,
+           y1 = -53.3/2-2,
+           col = "darkgreen",lty = 2)
+  
+  ########################
+  ### hypothetical play and pred (without closest def)
+  
+  twoord.plot(lx = tackle_frame$x_bc, ly = tackle_frame$y_bc,
+              rx = density(tackle_frame$x_bc-pred_s, bw = 2.5)$x,ry = density(tackle_frame$x_bc-pred_s, bw = 2.5)$y,
+              lylim = c(-(53.3/2*3)-5,53.3/2+5),
+              rylim = c(-max(density(tackle_frame$x_bc-pred_s, bw = 2.5)$y)/10,
+                        max(density(tackle_frame$x_bc-pred_s, bw = 2.5)$y)*2+ max(density(tackle_frame$x_bc-pred_s, bw = 2.5)$y)/5),
+              xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)),
+              lytickpos = seq(-20,20,by = 10),
+              rytickpos = round(seq(0,max(density(tackle_frame$x_bc-pred_s, bw = 2.5)$y),length.out = 5),3),
+              lcol = "blue",rcol = "chartreuse",type = "l", bty = "n",
+              axislab.cex = 0.7, main = "Hypothetical tackle frame predictions",
+              do.first = "abline(h = -(53.3/2*3),col = \"lightgrey\")")
+  
+  segments(x0 = 1:20 *5,
+           y0 = 53.3/2,
+           x1 = 1:20 *5,
+           y1 = -53.3/2,
+           col = "lightgray", lwd = 0.5)
+  segments(x0 = c(0,0),
+           y0 = c(53.3/2,-53.3/2),
+           x1 = c(100,100),
+           y1 = c(53.3/2,-53.3/2),
+           lwd = 1.5)
+  
+  segments(x0 = tackle_info$yardline_100,
+           y0 = 53.3/2,
+           x1 = tackle_info$yardline_100,
+           y1 = -53.3/2,
+           col = "purple",lty = 2)
+  #abline(v = tackle_info$yardline_100, col = "purple",lty = 2) # line of scrimmage
+  
+  segments(x0 = 0,
+           y0 = 53.3/2,
+           x1 = 0,
+           y1 = -53.3/2,
+           lwd = 1.5)
+  #abline(v = 0, lwd = 1.5) # endzone
+  
+  segments(x0 = tackle_info$true_yardline,
+           y0 = 53.3/2,
+           x1 = tackle_info$true_yardline,
+           y1 = -53.3/2,
+           col = "darkgreen",lty = 2)
+  #abline(v = tackle_info$true_yardline, col = "darkgreen",lty = 2) # true eop yardline
+  
+  # plot predicted yard end yard line
+  for(j in 1:1000){
+    segments(x0 = tackle_frame$x_bc-pred_s[j],
+             y0 = 53.3/2,
+             x1 = tackle_frame$x_bc-pred_s[j],
+             y1 = -53.3/2,
+             lwd = 2, col = alpha("chartreuse1", 0.01))
+    #abline(v = tackle_frame$x_bc-pred_s[j], lwd = 2, col = alpha("chartreuse1", 0.01))
+  }
+  segments(x0 = tackle_frame$x_bc - mean(pred_s),
+           y0 = 53.3/2,
+           x1 = tackle_frame$x_bc - mean(pred_s),
+           y1 = -53.3/2,
+           col = 1, lwd = 2)
+  #abline(v = tackle_frame$x_bc - mean(pred_s), col = 1, lwd = 2) # expected eop yardline
+  segments(x0 = tackle_frame$x_bc - mean(pred_s),
+           y0 = 53.3/2,
+           x1 = tackle_frame$x_bc - mean(pred_s),
+           y1 = -53.3/2,
+           col = "chartreuse1", lwd = 1)
+  #abline(v = tackle_frame$x_bc - mean(pred_s), col = "chartreuse1", lwd = 1) # expected eop yardline
+  
+  points(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = "blue")
+  points(tackle_frame$x_bc, tackle_frame$y_bc, pch = 16, col = "blue")
+  
+  for(j in 2:11){
+    points(tackle_frame[,paste0("x_or_off", j)], tackle_frame[, paste0("y_or_off", j)], pch = 20, col = "blue")
+  }
+  for(j in 1:10){
+    points(tackle_frame[,paste0("x_or_def", j+1)], tackle_frame[, paste0("y_or_def", j+1)], pch = 20, col = "red")
+  }
+  #points(trackingsub$x_football[i], trackingsub$y_football[i], pch = 9, col = "coral1", lwd = 2)
+  
+  segments(x0 = 1:20 *5,
+           y0 = -(53.3/2*3),
+           x1 = 1:20 *5,
+           y1 = -53.3/2-2,
+           col = "lightgray", lwd = 0.5)
+  
+  segments(x0 = tackle_info$yardline_100,
+           y0 = -(53.3/2*3),
+           x1 = tackle_info$yardline_100,
+           y1 = -53.3/2-2,
+           col = "purple",lty = 2)
+  
+  segments(x0 = 0,
+           y0 = -(53.3/2*3),
+           x1 = 0,
+           y1 = -53.3/2-4,
+           lwd = 1.5)
+  #abline(v = 0, lwd = 1.5) # endzone
+  
+  segments(x0 = tackle_frame$x_bc - mean(pred_s),
+           y0 = 53.3/2,
+           x1 = tackle_frame$x_bc - mean(pred_s),
+           y1 = -53.3/2,
+           col = 1, lwd = 2)
+  #abline(v = tackle_frame$x_bc - mean(pred_r), col = 1, lwd = 2) # expected eop yardline
+  segments(x0 = tackle_frame$x_bc - mean(pred_s),
+           y0 = 53.3/2,
+           x1 = tackle_frame$x_bc - mean(pred_s),
+           y1 = -53.3/2,
+           col = "chartreuse1", lwd = 1)
+  
+  segments(x0 = tackle_info$true_yardline,
+           y0 = -(53.3/2*3),
+           x1 = tackle_info$true_yardline,
+           y1 = -53.3/2-2,
+           col = "darkgreen",lty = 2)
+  
+}
+
+gpId <- 20221006001726
+
+vis_tackle_plays2(gpId)
+```
+
 ## Use case: analyse players {.tabset}
 
 
@@ -561,9 +995,34 @@ div(tbl)
 
 ```{r pos, fig.height=8, fig.width= 12, echo = FALSE}
 
-pos_df <- best_tacklers %>% group_by(position) %>% summarise(avg = mean(sum_tackle_gains),avg2 = mean(sum_tackle_gains2),avg_n_tackles = mean(n_tackles)) %>% arrange(desc(avg))
+pos_df <- best_tacklers %>% 
+  group_by(position) %>% 
+  summarise(avg = mean(sum_tackle_gains),
+            avg2 = mean(sum_tackle_gains2),
+            avg_n_tackles = mean(n_tackles),
+            n_players = n()) %>% 
+  arrange(desc(avg))
 
 reactable(pos_df,
-          bordered = TRUE)
+          bordered = TRUE,
+          
+          columns = list(
+            avg = colDef(
+              name = "Avg gains per position",
+              format = colFormat(digits = 2)
+            ),
+            avg2 = colDef(
+              name = "Avg gains2 per position",
+              format = colFormat(digits = 2)
+            ),
+            avg_n_tackles = colDef(
+              name = "Avg # of tackles",
+              format = colFormat(digits = 2)
+            ),
+            n_players = colDef(
+              name = "# of Players"
+            )
+          )
+)
 
 ```
