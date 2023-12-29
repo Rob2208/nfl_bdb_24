@@ -1,5 +1,5 @@
 ---
-title: "TER: A metric for evaluating the importance of tackles"
+title: "PEP: A metric for evaluating the importance of tackles"
 author: "Robert Bajons, Jan-Ole Koslik, Rouven Michels, Marius Ötting"
 date: "`r format(Sys.time(), '%d/%m/%y')`"
 output: html_document
@@ -43,11 +43,7 @@ Our analysis comprises three steps:
 
 ## Metrics
 
-### Fancy name for our metric?
-
-- TER: tackle efficiency rating
-
-- PGT: Points gained by tackle
+- PEP: Prevented Expected Points
 
 ### Player evaluation
 
