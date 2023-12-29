@@ -55,6 +55,8 @@ Our analysis comprises three steps:
 
 - potential drawback: cornerbacks/safeties are more likely to have a high value, because they are more likely to make "important" tackles. But that does not necessarily imply that these players make better tackles
 
+- potentially selection bias. Bad defensive lines or risky defensive styles (single high safety) lead to more opportunities for the safeties in these defences to provide touchdown saving tackles 
+
 ## Code
 
 ...link to GitHub...
