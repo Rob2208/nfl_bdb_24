@@ -1,5 +1,5 @@
 ---
-title: "TER: A metric for evaluating the importance of tackles"
+title: "PEP: A metric for evaluating the importance of tackles"
 author: "Robert Bajons, Jan-Ole Koslik, Rouven Michels, Marius Ötting"
 date: "`r format(Sys.time(), '%d/%m/%y')`"
 output: html_document
@@ -43,17 +43,15 @@ Our analysis comprises three steps:
 
 ## Metrics
 
-### Fancy name for our metric?
-
-- TER: tackle efficiency rating
-
-- PGT: Points gained by tackle
+- PEP: Prevented Expected Points
 
 ### Player evaluation
 
 ## Discussion
 
-- potential drawback: cornerbacks/safeties are more likely to have a high value, because they are more likely to make "important" tackles. But that does not necessarily imply that these players make better tackles
+In this contribution, we have developed a metric "PEP" for quantifying the value of a tackle. It allows practitioners to assess players, particularly in terms of their tackling abilities. 
+However, there are a few drawbacks that need to be taken into account during the evaluation process. An important consideration is the position and defensive playing style of the teams. Cornerbacks and safeties are often more capable of making "touchdown-saving tackles", resulting in their values typically being higher. Furthermore, safeties who engage in riskier defensive strategies, such as those employed by Brian Flores, receive less support of their teammates in the backfield, which is why their metrics may be higher. 
+When considering such aspects, however, the metric we have developed can serve as an additional piece of the puzzle in the overall assessment of (defensive) players, gaining practical relevance in the process of scouting players and opponents.
 
 ## Code
 
