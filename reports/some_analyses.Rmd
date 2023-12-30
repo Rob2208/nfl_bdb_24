@@ -465,7 +465,10 @@ vis_tackle_plays <- function(gpId){
   ########################
   ### real play and pred
   
-  plot(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = "blue", xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)), ylim = c(-53.3/2, 53.3/2), xlab = "x", ylab = "y")
+  plot(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = "blue", 
+       xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)), ylim = c(-53.3/2, 53.3/2), 
+       xlab = "x", ylab = "y",
+       bty = "n")
   segments(x0 = 1:20 *5,
            y0 = 53.3/2,
            x1 = 1:20 *5,
@@ -541,7 +544,10 @@ vis_tackle_plays <- function(gpId){
   ########################
   ### hypothetical play and pred (without closest def)
   
-  plot(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = "blue", xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)), ylim = c(-53.3/2, 53.3/2), xlab = "x", ylab = "y")
+  plot(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = "blue", 
+       xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)), ylim = c(-53.3/2, 53.3/2), 
+       xlab = "x", ylab = "y",
+       bty = "n")
   segments(x0 = 1:20 *5,
            y0 = 53.3/2,
            x1 = 1:20 *5,
