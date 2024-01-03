@@ -54,6 +54,7 @@ We did not rely on the event column to identify tackle events, but defined as th
 - Plays rausnehmen
 
 ...add an example play to illustrate the "what if" scenario...
+Hier die end of play yardline und "yards to be gained" einzeichnen.
 
 Animation
 
@@ -61,7 +62,7 @@ Animation
 
 Our analysis comprises four steps:
 
-1. **Model Training:** We train a model designed to predict the end-of-play yardline (see Yurko...). The model uses the previously described features. To account for potential non-linear and interaction effects and to end up with a conditional density estimator $\hat{f}(y \mid x)$, we consider a random forest comprising 1000 individual trees.
+1. **Model Training:** We train a model designed to predict the end-of-play yardline (see Yurko...). The model uses the previously described features, only including the 10 closest defenders. To account for potential non-linear and interaction effects and to end up with a conditional density estimator $\hat{f}(y \mid x)$, we consider a random forest comprising 1000 individual trees.
 
 RMSE?
 
