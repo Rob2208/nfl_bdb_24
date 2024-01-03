@@ -409,11 +409,11 @@ heading straight towards the relevant endzone.</li>
 </div>
 <div id="response-variable-yards-to-be-gained" class="section level4">
 <h4>Response variable: Yards to be gained</h4>
-<p>For each play, we defined the x position of the ballcarrier in the
-last frame as the end-of-play yardline. The response variable we aim to
-predict is now yards to be gained which is the difference of the x
-position of the ballcarrier in a given frame to the end of play
-yardline.</p>
+<p>For each play, we defined the x position of the ball carrier in the
+last frame as the end-of-play yard line. The response variable we aim to
+predict is now <em>yards to be gained</em> as the difference of the x
+position of the ballcarrier in a given frame to the end-of-play yard
+line.</p>
 </div>
 <div id="feature-engineering" class="section level4">
 <h4>Feature engineering</h4>
@@ -438,7 +438,8 @@ the ballcarrier is minimal within a given play.</p>
 <ul>
 <li>Plays rausnehmen</li>
 </ul>
-<p>…add an example play to illustrate the “what if” scenario…</p>
+<p>…add an example play to illustrate the “what if” scenario… Hier die
+end of play yardline und “yards to be gained” einzeichnen.</p>
 <p>Animation</p>
 </div>
 </div>
@@ -448,12 +449,16 @@ the ballcarrier is minimal within a given play.</p>
 <ol style="list-style-type: decimal">
 <li><strong>Model Training:</strong> We train a model designed to
 predict the end-of-play yardline (see Yurko…). The model uses the
-previously described features. To account for potential non-linear and
-interaction effects and to end up with a conditional density estimator
-<span class="math inline">\(\hat{f}(y \mid x)\)</span>, we consider a
-random forest comprising 1000 individual trees.</li>
+previously described features, only including the 10 closest defenders.
+While accounting for the time-series nature of the data by using e.g. a
+transformer architecture, we do not only want to obtain a point estimate
+for the yard line at the end of the play. Therefore, and to account for
+potential non-linear and interaction effects and to end up with a
+conditional density estimator <span class="math inline">\(\hat{f}(y \mid
+x)\)</span>, we consider a random forest comprising 1000 individual
+trees.</li>
 </ol>
-<p>RMSE?</p>
+<p>RMSE und MAE reporten.</p>
 <ol start="2" style="list-style-type: decimal">
 <li><p><strong>Tackler Replacement Procedure:</strong> For each tackle,
 we systematically remove the closest defender at the tackle moment and
@@ -471,11 +476,12 @@ model.</p></li>
 and average the outcomes (because of integral calculations, Monte Carlo
 approximation). Es gibt zwei Möglichkeiten (echte + expected mit full
 player) einen Tackle Value zu berechnen, wir nehmen Möglichkeit 2 This
-process yields the tackle’s value “PEP” (for prevented Expected Points)
-with the respective tackler excluded from the data set.</li>
+process yields the tackle’s value <em>PEP</em> (for prevented Expected
+Points) with the respective tackler excluded from the data set.</li>
 </ol>
+<p>Causal inference Ansatz, aber auf g(y) also EP Ebene.</p>
 <p><span class="math display">\[
-\text{E}(g(y)) = \int_{0}^\infty g(y) \hat{f}(y \mid x) dy
+\text{E}(g(y)) = \int_{0}^\infty g(y) \: \hat{f} (y \mid x) \: dy
 \]</span> Instead of a two-step procedure where we first obtain a
 density estimate via kernel density estimation from the individual tree
 predictions to then integrate numerically, we treat the tree-predictions
