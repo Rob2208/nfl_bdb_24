@@ -20,32 +20,37 @@ Although this citation dates back several decades --- and American Football has 
 When assessing players' tackles, one is usually interested in a hypothetical scenario: the potential outcome if a player were to miss a tackle. 
 Essentially, this involves quantifying the yards saved by a defensive player. Ideally, albeit impractically, running a play twice --- once with the defense player executing the tackle and a second time without --- would allow a direct comparison of the yardage gained by the ball carrier, thus enabling to evaluate the impact of the defensive player's tackle.
 
-
 Given the impracticability of such a hypothetical scenario, our approach involves approximating it by predicting the yardline of the ongoing play twice. First, we consider the inclusion of the closest defender who executed the tackle, and in a next step, we exclude this player. Based on these predicted yardlines, we compute the expected points (EP) gained through the tackle. This approach enables us to evaluate players in terms of the importance of their tacklings.
 
+## Data
 
-## Analysis
-
-### Example play
+- Trainingsdaten
+- Variablen
+- wie wurde Tackle definiert
+- yards to be gained
+- Daten standardisiert
 
 ...add an example play to illustrate the "what if" scenario...
 
-### Methods
+Animation
 
-Our analysis comprises three steps:
+## Analysis
 
-1. Model Training: We train a model designed to predict the end-of-play yardline. The model uses features derived solely from the distances to the ball carrier of the 10 nearest defenders. To account for potential non-linear and interaction effects, we consider a random forest comprising 1000 individual trees.
+Our analysis comprises four steps:
+
+1. Model Training: We train a model designed to predict the end-of-play yardline (see Yurko...). The model uses the previously described features. To account for potential non-linear and interaction effects and to end up with a conditional density estimator, we consider a random forest comprising 1000 individual trees.
 
 2. Tackler Replacement Procedure: For each tackle, we systematically remove the closest defender at the tackle moment and replaced them with the second closest (and so forth). 
 
-3. Tackle Evaluation: The evaluation of tackles involves the use of an EP model with the following features: .... Using our random forest, we predict the end-of-play yardline across the 1000 trees and consider these predictions as inputs for the EP model. Next, we calculate the EPs for all 1000 predictions and average the outcomes. This process yields the tackle's value, denoting the points gained, with the respective tackler excluded from the data set.
+3. Yardline Prediction: The evaluation of tackles involves the use of an EP model with the following features: .... Using our random forest, we predict the end-of-play yardline across the 1000 trees and consider these predictions as inputs for the EP model. 
 
+Animation mit Dichteschätzung
 
-## Metrics
+4. Tackle Evaluation: We set up an own EP model (similar to nflfastR, ...) and calculate the EPs for all 1000 predictions and average the outcomes (because of integral calculations, Monte Carlo approximation). 
+Es gibt zwei Möglichkeiten (echte + expected mit full player) einen Tackle Value zu berechnen, wir nehmen Möglichkeit 2 
+This process yields the tackle's value "PEP" (for prevented Expected Points) with the respective tackler excluded from the data set. 
 
-- PEP: Prevented Expected Points
-
-### Player evaluation
+## Player evaluation
 
 ## Discussion
 
@@ -53,7 +58,13 @@ In this contribution, we developed a metric "PEP" for quantifying the value of a
 However, there are a few drawbacks that need to be taken into account during the evaluation process. Important considerations are the position and the defensive playing styles of teams. Cornerbacks and safeties are often more capable of making "touchdown-saving tackles", resulting in their values typically being higher. Furthermore, safeties who engage in riskier defensive strategies, such as those employed by Brian Flores, receive less support of their teammates in the backfield, which is why their metrics may be higher. 
 When taking such aspects into account, however, the metric we have developed can serve as an additional puzzle piece in the overall assessment of (defensive) players and might gain practical relevance in the process of scouting players and opponents.
 
+Future research
+
 ## Code
 
 ...link to GitHub...
+
+## References
+
+Yurko, nflfastR
 
