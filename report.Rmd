@@ -24,11 +24,32 @@ Given the impracticability of such a hypothetical scenario, our approach involve
 
 ## Data
 
-- Trainingsdaten
-- Variablen
+To accurately predict the yardline at the end of any given play we needed to create several features derived from the tracking data. More specifically, we conducted the following feature preprocessing:
+
+#### Change of coordinate system
+We transformed the coordinate system by 
+
+* redefining the x variable as the x distance to the endzone (such that all play directions are from right to left and the relevant endzone is at zero),
+* centering the y-variable such that the center of the field is at zero,
+* changing the direction variable, such that zero degrees represents heading straight towards the relevant endzone.
+
+#### Response variable: Yards to be gained
+For each play, we defined the x position of the ballcarrier in the last frame as the end-of-play yardline. The response variable we aim to predict is now yards to be gained which is the difference of the x position of the ballcarrier in a given frame to the end of play yardline.
+
+#### Feature engineering
+For all players and the ball carrier we use the features already contained in the tracking data, namely x- and y-coordinates, speed, acceleration, distance covered, orientation and direction.
+
+For all players except the ball carrier we further compute
+
+* euclidean distance to ball carrier,
+* x-distance to ball carrier,
+* y-distance to ball carrier.
+
+For defensive players only, we additionally compute the angle to the shortest segment ...
+
+Subsequently we order all players (in each frame) with respect to their euclidean distance to the ball carrier and standardise all features.
+
 - wie wurde Tackle definiert
-- yards to be gained
-- Daten standardisiert
 - Plays rausnehmen
 
 ...add an example play to illustrate the "what if" scenario...
@@ -40,6 +61,8 @@ Animation
 Our analysis comprises four steps:
 
 1. Model Training: We train a model designed to predict the end-of-play yardline (see Yurko...). The model uses the previously described features. To account for potential non-linear and interaction effects and to end up with a conditional density estimator, we consider a random forest comprising 1000 individual trees.
+
+RMSE?
 
 2. Tackler Replacement Procedure: For each tackle, we systematically remove the closest defender at the tackle moment and replaced them with the second closest (and so forth). 
 
