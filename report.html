@@ -385,15 +385,18 @@ player’s tackle.</p>
 approach involves approximating it by predicting the yardline of the
 ongoing play twice. First, we consider the inclusion of the closest
 defender who executed the tackle, and in a next step, we exclude this
-player. Based on these predicted yardlines, we compute the expected
+player. <em>Hier sollten wir noch etwas mehr bewerben, dass wir nicht
+einfach die gesaften yards rauskriegen sondern einen tackle value auf
+expected points Skala. Das ist ja ein sehr wichtiger Pluspunkt bei
+uns.</em> Based on these predicted yardlines, we compute the expected
 points (EP) gained through the tackle. This approach enables us to
 evaluate players in terms of the importance of their tacklings.</p>
 </div>
 <div id="data" class="section level2">
 <h2>Data</h2>
-<p>To accurately predict the yardline at the end of any given play we
-needed to create several features derived from the tracking data. More
-specifically, we conducted the following feature preprocessing:</p>
+<p>To accurately predict the yardline at the end of any given play it is
+necessary to create several features derived from the tracking data.
+More specifically, we conducted the following feature preprocessing:</p>
 <div id="change-of-coordinate-system" class="section level4">
 <h4>Change of coordinate system</h4>
 <p>We transformed the coordinate system by</p>
@@ -422,9 +425,9 @@ contained in the tracking data, namely x- and y-coordinates, speed,
 acceleration, distance covered, orientation and direction.</p>
 <p>For all players except the ball carrier we further compute</p>
 <ul>
-<li>euclidean distance to ball carrier,</li>
-<li>x-distance to ball carrier,</li>
-<li>y-distance to ball carrier.</li>
+<li>euclidean distance to the ball carrier,</li>
+<li>x-distance to the ball carrier,</li>
+<li>y-distance to the ball carrier.</li>
 </ul>
 <p>For defensive players only, we additionally compute the absolute
 difference of the defender direction and the angle of the shortest
