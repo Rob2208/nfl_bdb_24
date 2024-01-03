@@ -29,6 +29,7 @@ Given the impracticability of such a hypothetical scenario, our approach involve
 - wie wurde Tackle definiert
 - yards to be gained
 - Daten standardisiert
+- Plays rausnehmen
 
 ...add an example play to illustrate the "what if" scenario...
 
