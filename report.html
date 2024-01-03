@@ -415,8 +415,8 @@ predict is now yards to be gained which is the difference of the x
 position of the ballcarrier in a given frame to the end of play
 yardline.</p>
 </div>
-<div id="feature-engeneering" class="section level4">
-<h4>Feature engeneering</h4>
+<div id="feature-engineering" class="section level4">
+<h4>Feature engineering</h4>
 <p>For all players and the ball carrier we use the features already
 contained in the tracking data, namely x- and y-coordinates, speed,
 acceleration, distance covered, orientation and direction.</p>
@@ -443,32 +443,44 @@ features.</p>
 <h2>Analysis</h2>
 <p>Our analysis comprises four steps:</p>
 <ol style="list-style-type: decimal">
-<li>Model Training: We train a model designed to predict the end-of-play
-yardline (see Yurko…). The model uses the previously described features.
-To account for potential non-linear and interaction effects and to end
-up with a conditional density estimator, we consider a random forest
-comprising 1000 individual trees.</li>
+<li><strong>Model Training:</strong> We train a model designed to
+predict the end-of-play yardline (see Yurko…). The model uses the
+previously described features. To account for potential non-linear and
+interaction effects and to end up with a conditional density estimator
+<span class="math inline">\(\hat{f}(y \mid x)\)</span>, we consider a
+random forest comprising 1000 individual trees.</li>
 </ol>
 <p>RMSE?</p>
 <ol start="2" style="list-style-type: decimal">
-<li><p>Tackler Replacement Procedure: For each tackle, we systematically
-remove the closest defender at the tackle moment and replaced them with
-the second closest (and so forth).</p></li>
-<li><p>Yardline Prediction: The evaluation of tackles involves the use
-of an EP model with the following features: …. Using our random forest,
-we predict the end-of-play yardline across the 1000 trees and consider
-these predictions as inputs for the EP model.</p></li>
+<li><p><strong>Tackler Replacement Procedure:</strong> For each tackle,
+we systematically remove the closest defender at the tackle moment and
+replaced them with the second closest (and so forth).</p></li>
+<li><p><strong>Yardline Prediction:</strong> The evaluation of tackles
+involves the use of an EP model with the following features: …. Using
+our random forest, we predict the end-of-play yardline across the 1000
+trees and consider these predictions as inputs for the EP
+model.</p></li>
 </ol>
 <p>Animation mit Dichteschätzung</p>
 <ol start="4" style="list-style-type: decimal">
-<li>Tackle Evaluation: We set up an own EP model (similar to nflfastR,
-…) and calculate the EPs for all 1000 predictions and average the
-outcomes (because of integral calculations, Monte Carlo approximation).
-Es gibt zwei Möglichkeiten (echte + expected mit full player) einen
-Tackle Value zu berechnen, wir nehmen Möglichkeit 2 This process yields
-the tackle’s value “PEP” (for prevented Expected Points) with the
-respective tackler excluded from the data set.</li>
+<li><strong>Tackle Evaluation:</strong> We set up an own EP model
+(similar to nflfastR, …) and calculate the EPs for all 1000 predictions
+and average the outcomes (because of integral calculations, Monte Carlo
+approximation). Es gibt zwei Möglichkeiten (echte + expected mit full
+player) einen Tackle Value zu berechnen, wir nehmen Möglichkeit 2 This
+process yields the tackle’s value “PEP” (for prevented Expected Points)
+with the respective tackler excluded from the data set.</li>
 </ol>
+<p><span class="math display">\[
+\text{E}(g(y)) = \int_{0}^\infty g(y) \hat{f}(y \mid x) dy
+\]</span> Instead of a two-step procedure where we first obtain a
+density estimate via kernel density estimation from the individual tree
+predictions to then integrate numerically, we treat the tree-predictions
+<span class="math inline">\(\hat{y}_1, \dots, \hat{y}_{1000}\)</span> as
+samples from the conditional density and approximate the above
+expectation via the Monte Carlo estimate <span class="math display">\[
+\frac{1}{1000} \sum_{i=1}^{1000} g(\hat{y}_i).
+\]</span></p>
 </div>
 <div id="player-evaluation" class="section level2">
 <h2>Player evaluation</h2>

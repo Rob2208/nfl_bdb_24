@@ -45,11 +45,12 @@ For all players except the ball carrier we further compute
 * x-distance to ball carrier,
 * y-distance to ball carrier.
 
-For defensive players only, we additionally compute the angle to the shortest segment ...
+For defensive players only, we additionally compute the absolute difference of the defender direction and the angle of the shortest segement between the defender and the ball carrier.
 
 Subsequently we order all players (in each frame) with respect to their euclidean distance to the ball carrier and standardise all features.
 
-- wie wurde Tackle definiert
+We did not rely on the event column to identify tackle events, but defined as the tackle event the frame in which the tacklers distance to the ballcarrier is minimal within a given play.
+
 - Plays rausnehmen
 
 ...add an example play to illustrate the "what if" scenario...
@@ -60,19 +61,27 @@ Animation
 
 Our analysis comprises four steps:
 
-1. Model Training: We train a model designed to predict the end-of-play yardline (see Yurko...). The model uses the previously described features. To account for potential non-linear and interaction effects and to end up with a conditional density estimator, we consider a random forest comprising 1000 individual trees.
+1. **Model Training:** We train a model designed to predict the end-of-play yardline (see Yurko...). The model uses the previously described features. To account for potential non-linear and interaction effects and to end up with a conditional density estimator $\hat{f}(y \mid x)$, we consider a random forest comprising 1000 individual trees.
 
 RMSE?
 
-2. Tackler Replacement Procedure: For each tackle, we systematically remove the closest defender at the tackle moment and replaced them with the second closest (and so forth). 
+2. **Tackler Replacement Procedure:** For each tackle, we systematically remove the closest defender at the tackle moment and replaced them with the second closest (and so forth). 
 
-3. Yardline Prediction: The evaluation of tackles involves the use of an EP model with the following features: .... Using our random forest, we predict the end-of-play yardline across the 1000 trees and consider these predictions as inputs for the EP model. 
+3. **Yardline Prediction:** The evaluation of tackles involves the use of an EP model with the following features: .... Using our random forest, we predict the end-of-play yardline across the 1000 trees and consider these predictions as inputs for the EP model. 
 
 Animation mit Dichteschätzung
 
-4. Tackle Evaluation: We set up an own EP model (similar to nflfastR, ...) and calculate the EPs for all 1000 predictions and average the outcomes (because of integral calculations, Monte Carlo approximation). 
+4. **Tackle Evaluation:** We set up an own EP model (similar to nflfastR, ...) and calculate the EPs for all 1000 predictions and average the outcomes (because of integral calculations, Monte Carlo approximation). 
 Es gibt zwei Möglichkeiten (echte + expected mit full player) einen Tackle Value zu berechnen, wir nehmen Möglichkeit 2 
 This process yields the tackle's value "PEP" (for prevented Expected Points) with the respective tackler excluded from the data set. 
+
+$$
+\text{E}(g(y)) = \int_{0}^\infty g(y) \hat{f}(y \mid x) dy
+$$
+Instead of a two-step procedure where we first obtain a density estimate via kernel density estimation from the individual tree predictions to then integrate numerically, we treat the tree-predictions $\hat{y}_1, \dots, \hat{y}_{1000}$ as samples from the conditional density and approximate the above expectation via the Monte Carlo estimate
+$$
+\frac{1}{1000} \sum_{i=1}^{1000} g(\hat{y}_i).
+$$
 
 ## Player evaluation
 
