@@ -24,7 +24,6 @@ Given the impracticability of such a hypothetical scenario, our approach involve
 
 <!-- We will find that such density estimates often show multimodality, which is especially relevant when large yards gained have a strong effect on the expected points. -->
 
-<!-- *Hier sollten wir noch etwas mehr bewerben, dass wir nicht einfach die gesaften yards rauskriegen sondern einen tackle value auf expected points Skala. Das ist ja ein sehr wichtiger Pluspunkt bei uns.* -->
 <!-- Based on these predicted yardlines, we compute the expected points (EP) gained through the tackle. This approach enables us to evaluate players in terms of the importance of their tacklings. -->
 
 
