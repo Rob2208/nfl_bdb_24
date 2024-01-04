@@ -461,17 +461,19 @@ end of play yardline und “yards to be gained” einzeichnen.</p>
 <h4>1. Model Training</h4>
 <p>We train a model designed to predict the yards to be gained which can
 be backtransformed into a prediction for the end-of-play yardline (see
-Yurko…). The model uses the previously described features, only
-including the 10 closest defenders. While accounting for the time-series
-nature of the data by using e.g. a transformer architecture, we do not
-only want to obtain a point estimate for the yard line at the end of the
-play. Therefore, and to account for potential non-linear and interaction
-effects and to end up with a conditional density estimator <span class="math inline">\(\hat{f}(y \mid x)\)</span>, we consider a random
-forest comprising 1000 individual trees, treating some accuracy in mean
-prediction for adequate uncertainty quantification. In general, modeling
-the uncertainty is important, as for example, in high-yardage plays, the
-variance of the end of play yardline is considerably larger, than in
-low-yardage plays.</p>
+Yurko et al., 2020). The model uses the previously described features,
+only including the 10 closest defenders. While accounting for the
+time-series nature of the data by using e.g. a transformer architecture
+could be beneficial, we do not only want to obtain a point estimate for
+the yard line at the end of the play. Therefore, and to account for
+potential non-linear and interaction effects and to end up with a
+conditional density estimator <span class="math inline">\(\hat{f}(y \mid
+x)\)</span>, we consider a random forest comprising 1000 individual
+trees, treating some accuracy in mean prediction for adequate
+uncertainty quantification. In general, modeling the uncertainty is
+important, as for example, in high-yardage plays, the variance of the
+end of play yardline is considerably larger, than in low-yardage
+plays.</p>
 <p>Plot prediction für low und high yardage plays, der zeigt, dass
 unsere Verteilung recht schmal und recht breit sein kann.</p>
 <p>RMSE und MAE reporten.</p>
@@ -511,9 +513,9 @@ points based on the end of play yardline <span class="math inline">\(y\)</span> 
 \text{E}(g(y) \mid x) = \int_{0}^\infty g(y) \: \hat{f} (y \mid x) \: dy
 \]</span> For the mapping <span class="math inline">\(g\)</span> we set
 up our own EP model (similar to nflfastR) based on an XGBoost
-architecture which, after model training, can be used to calculate the
-expected points, based on a given yardline and the additional features
-…</p>
+architecture (Chen and Guestrin, 2016) which, after model training, can
+be used to calculate the expected points, based on a given yardline and
+the additional features …</p>
 <p>Instead of a two-step procedure, first obtaining a kernel density
 estimate from the individual tree predictions (introducing subjectivity
 in bandwidth choice) and then integrating numerically, we treat the
@@ -567,7 +569,18 @@ relevance in the process of scouting players and opponents.</p>
 </div>
 <div id="references" class="section level2">
 <h2>References</h2>
-<p>Yurko, nflfastR</p>
+<ul>
+<li>Carl S, Baldwin B (2023). nflfastR: Functions to Efficiently Access
+NFL Play by Play Data. R package version 4.6.0.9000, <a href="https://github.com/nflverse/nflfastR" class="uri">https://github.com/nflverse/nflfastR</a>, <a href="https://www.nflfastr.com/" class="uri">https://www.nflfastr.com/</a>.</li>
+<li>Chen, T., &amp; Guestrin, C. (2016). Xgboost: A scalable tree
+boosting system. In Proceedings of the 22nd acm sigkdd international
+conference on knowledge discovery and data mining (pp. 785-794).</li>
+<li>Yurko, R., Matano, F., Richardson, L. F., Granered, N., Pospisil,
+T., Pelechrinis, K., &amp; Ventura, S. L. (2020). Going deep: models for
+continuous-time within-play valuation of game outcomes in American
+football with tracking data. Journal of Quantitative Analysis in Sports,
+16(2), 163-182.</li>
+</ul>
 </div>
 
 

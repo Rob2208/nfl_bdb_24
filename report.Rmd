@@ -69,7 +69,7 @@ Animation
 Our analysis comprises four steps:
 
 #### 1. Model Training
-We train a model designed to predict the yards to be gained which can be backtransformed into a prediction for the end-of-play yardline (see Yurko...). The model uses the previously described features, only including the 10 closest defenders. While accounting for the time-series nature of the data by using e.g. a transformer architecture could be beneficial, we do not only want to obtain a point estimate for the yard line at the end of the play. Therefore, and to account for potential non-linear and interaction effects and to end up with a conditional density estimator $\hat{f}(y \mid x)$, we consider a random forest comprising 1000 individual trees, treating some accuracy in mean prediction for adequate uncertainty quantification. In general, modeling the uncertainty is important, as for example, in high-yardage plays, the variance of the end of play yardline is considerably larger, than in low-yardage plays.
+We train a model designed to predict the yards to be gained which can be backtransformed into a prediction for the end-of-play yardline (see Yurko et al., 2020). The model uses the previously described features, only including the 10 closest defenders. While accounting for the time-series nature of the data by using e.g. a transformer architecture could be beneficial, we do not only want to obtain a point estimate for the yard line at the end of the play. Therefore, and to account for potential non-linear and interaction effects and to end up with a conditional density estimator $\hat{f}(y \mid x)$, we consider a random forest comprising 1000 individual trees, treating some accuracy in mean prediction for adequate uncertainty quantification. In general, modeling the uncertainty is important, as for example, in high-yardage plays, the variance of the end of play yardline is considerably larger, than in low-yardage plays.
 
 Plot prediction für low und high yardage plays, der zeigt, dass unsere Verteilung recht schmal und recht breit sein kann.
 
@@ -98,7 +98,7 @@ From a mathematical perspective, we want to obtain the mean expected points, giv
 $$
 \text{E}(g(y) \mid x) = \int_{0}^\infty g(y) \: \hat{f} (y \mid x) \: dy
 $$
-For the mapping $g$ we set up our own EP model (similar to nflfastR) based on an XGBoost architecture which, after model training, can be used to calculate the expected points, based on a given yardline and the additional features ...
+For the mapping $g$ we set up our own EP model (similar to nflfastR) based on an XGBoost architecture (Chen and Guestrin, 2016) which, after model training, can be used to calculate the expected points, based on a given yardline and the additional features ...
 
 
 Instead of a two-step procedure, first obtaining a kernel density estimate from the individual tree predictions (introducing subjectivity in bandwidth choice) and then integrating numerically, we treat the tree-predictions $\hat{y}_1, \dots, \hat{y}_{1000}$ as samples from the conditional density and approximate the above expectation via the Monte Carlo estimate
@@ -135,5 +135,7 @@ Future research
 
 ## References
 
-Yurko, nflfastR
+* Carl S, Baldwin B (2023). nflfastR: Functions to Efficiently Access NFL Play by Play Data. R package version 4.6.0.9000, https://github.com/nflverse/nflfastR, https://www.nflfastr.com/.
+* Chen, T., & Guestrin, C. (2016). Xgboost: A scalable tree boosting system. In Proceedings of the 22nd acm sigkdd international conference on knowledge discovery and data mining (pp. 785-794).
+* Yurko, R., Matano, F., Richardson, L. F., Granered, N., Pospisil, T., Pelechrinis, K., & Ventura, S. L. (2020). Going deep: models for continuous-time within-play valuation of game outcomes in American football with tracking data. Journal of Quantitative Analysis in Sports, 16(2), 163-182.
 
