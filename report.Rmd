@@ -56,12 +56,12 @@ Subsequently we order all players (in each frame) with respect to their euclidea
 
 We did not rely on the event column to identify tackle events, but defined as the tackle event the frame in which the tacklers distance to the ballcarrier is minimal within a given play.
 
-- Plays rausnehmen
+<span style="color: red;">- Plays rausnehmen</span>
 
-...add an example play to illustrate the "what if" scenario...
-Hier die end of play yardline und "yards to be gained" einzeichnen.
+<span style="color: red;">...add an example play to illustrate the "what if" scenario...
+Hier die end of play yardline und "yards to be gained" einzeichnen.</span>
 
-Animation
+<span style="color: red;">Animation</span>
 
 ## Analysis
 
@@ -70,9 +70,9 @@ Our analysis comprises four steps:
 #### 1. Model Training
 We train a model designed to predict the yards to be gained which can be backtransformed into a prediction for the end-of-play yardline (see Yurko et al., 2020). The model uses the previously described features, only including the 10 closest defenders. While accounting for the time-series nature of the data by using e.g. a transformer architecture could be beneficial, we do not only want to obtain a point estimate for the yard line at the end of the play. Therefore, and to account for potential non-linear and interaction effects and to end up with a conditional density estimator $\hat{f}(y \mid x)$, we consider a random forest comprising 1000 individual trees, treating some accuracy in mean prediction for adequate uncertainty quantification. In general, modeling the uncertainty is important, as for example, in high-yardage plays, the variance of the end of play yardline is considerably larger, than in low-yardage plays.
 
-Plot prediction für low und high yardage plays, der zeigt, dass unsere Verteilung recht schmal und recht breit sein kann.
+<span style="color: red;">Plot prediction für low und high yardage plays, der zeigt, dass unsere Verteilung recht schmal und recht breit sein kann.</span>
 
-RMSE und MAE reporten.
+<span style="color: red;">RMSE und MAE reporten.</span>
 
 #### 2. Tackler Replacement Procedure 
 For each tackle, we systematically remove the closest defender at the tackle moment, replacing his features with those of the second closest defender. We replace the second closest with the third closest, and so on. We do this, to produce a prediction for the hypothetical "what if" scenario, to compare to the existing tackle.
@@ -80,11 +80,11 @@ For each tackle, we systematically remove the closest defender at the tackle mom
 #### 3. Yardline Prediction 
 Using the trained random forest, we predict the end-of-play yardline across the 1000 trees. Using a kernel density estimator for visualization, we can plot the dynamically evolving conditional density estimation withing any given play.
 
-Animation mit Dichteschätzung
+<span style="color: red;">Animation mit Dichteschätzung</span>
 
 For the tackle frames in particular, we obtain one predictive density, based on the original features, and one based on the replacement procedure explained above.
 
-Plot mit beiden conditional density estimates (und closest defender mit besonderer point shape oder so)
+<span style="color: red;">Plot mit beiden conditional density estimates (und closest defender mit besonderer point shape oder so)</span>
 
 #### 4. Tackle Evaluation 
 <!-- We set up an own EP model (similar to nflfastR, ...) and calculate the EPs for all 1000 predictions and average the outcomes (because of integral calculations, Monte Carlo approximation).  -->
@@ -97,7 +97,7 @@ From a mathematical perspective, we want to obtain the mean expected points, giv
 $$
 \text{E}(g(y) \mid x) = \int_{0}^\infty g(y) \: \hat{f} (y \mid x) \: dy
 $$
-For the mapping $g$ we set up our own EP model (similar to nflfastR) based on an Xgboost architecture (Chen and Guestrin, 2016) which, after model training, can be used to calculate the expected points, based on a given yardline and the additional features ...
+For the mapping $g$ we set up our own EP model (similar to nflfastR) based on an Xgboost architecture (Chen and Guestrin, 2016) which, after model training, can be used to calculate the expected points, based on a given yardline and the <span style="color: red;">additional features ...</span>
 
 
 Instead of a two-step procedure, first obtaining a kernel density estimate from the individual tree predictions (introducing subjectivity in bandwidth choice) and then integrating numerically, we treat the tree-predictions $\hat{y}_1, \dots, \hat{y}_{1000}$ as samples from the conditional density and approximate the above expectation via the Monte Carlo estimate
@@ -111,7 +111,7 @@ $$
 $$
 where $x_0$ denotes the transformed features after removing the closest defender and $x_1$ denotes the original features. This metric can be considered the treatment effect of the tackle. 
 
-But we can also replace the second term by the expected points pased on the true observed end of play yard line, yielding a value of that specific tackle.
+<span style="color: orange;">But we can also replace the second term by the expected points pased on the true observed end of play yard line, yielding a value of that specific tackle.</span>
 
 ![](plots/PEP_pipeline.jpg)
 
