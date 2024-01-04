@@ -81,7 +81,7 @@ Subsequently we order all players (in each frame) with respect to their euclidea
 
 We did not rely on the event column to identify tackle events, but defined as the tackle event the frame in which the tacklers distance to the ballcarrier is minimal within a given play.
 
-<span style="color: red;">- Plays rausnehmen</span>
+<span style="color: red;">Schreiben welche plays wir rausgenommen haben und warum</span>
 
 <span style="color: red;">...add an example play to illustrate the "what if" scenario...
 Hier die end of play yardline und "yards to be gained" einzeichnen.</span>
@@ -435,7 +435,6 @@ where $x_0$ denotes the transformed features after removing the closest defender
 - PEP distribution by position
 
 ## Discussion
-
 In this contribution, we developed a metric "PEP" for quantifying the value of a tackle. It allows practitioners to assess players, particularly in terms of their tackling abilities. 
 However, there are a few drawbacks that need to be taken into account during the evaluation process. Important considerations are the position and the defensive playing styles of teams. Cornerbacks and safeties are often more capable of making "touchdown-saving tackles", resulting in their values typically being higher. Furthermore, safeties who engage in riskier defensive strategies, such as those employed by Brian Flores, receive less support of their teammates in the backfield, which is why their metrics may be higher. 
 When taking such aspects into account, however, the metric we have developed can serve as an additional puzzle piece in the overall assessment of (defensive) players and might gain practical relevance in the process of scouting players and opponents.
