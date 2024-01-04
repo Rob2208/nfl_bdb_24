@@ -131,7 +131,7 @@ Future research
 
 ## Code
 
-...link to GitHub...
+All code for data preprocessing, model training, prediction and player evaluation can be found [here](https://github.com/Rob2208/nfl_bdb_24).
 
 ## References
 
