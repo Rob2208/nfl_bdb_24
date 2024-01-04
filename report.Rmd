@@ -439,8 +439,6 @@ In this contribution, we developed a metric "PEP" for quantifying the value of a
 However, there are a few drawbacks that need to be taken into account during the evaluation process. Important considerations are the position and the defensive playing styles of teams. Cornerbacks and safeties are often more capable of making "touchdown-saving tackles", resulting in their values typically being higher. Furthermore, safeties who engage in riskier defensive strategies, such as those employed by Brian Flores, receive less support of their teammates in the backfield, which is why their metrics may be higher. 
 When taking such aspects into account, however, the metric we have developed can serve as an additional puzzle piece in the overall assessment of (defensive) players and might gain practical relevance in the process of scouting players and opponents.
 
-Future research
-
 ## Code
 
 All code for data preprocessing, model training, prediction and player evaluation can be found [here](https://github.com/Rob2208/nfl_bdb_24).
