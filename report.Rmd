@@ -66,11 +66,11 @@ Animation
 
 Our analysis comprises four steps:
 
-1. **Model Training:** We train a model designed to predict the end-of-play yardline (see Yurko...). The model uses the previously described features, only including the 10 closest defenders. While accounting for the time-series nature of the data by using e.g. a transformer architecture, we do not only want to obtain a point estimate for the yard line at the end of the play. Therefore, and to account for potential non-linear and interaction effects and to end up with a conditional density estimator $\hat{f}(y \mid x)$, we consider a random forest comprising 1000 individual trees.
+1. **Model Training:** We train a model designed to predict the end-of-play yardline (see Yurko...). The model uses the previously described features, only including the 10 closest defenders. While accounting for the time-series nature of the data by using e.g. a transformer architecture, we do not only want to obtain a point estimate for the yard line at the end of the play. Therefore, and to account for potential non-linear and interaction effects and to end up with a conditional density estimator $\hat{f}(y \mid x)$, we consider a random forest comprising 1000 individual trees, treating little accuracy in mean prediction for adequate uncertainty quantification.
 
 RMSE und MAE reporten.
 
-2. **Tackler Replacement Procedure:** For each tackle, we systematically remove the closest defender at the tackle moment and replaced them with the second closest (and so forth). 
+2. **Tackler Replacement Procedure:** For each tackle, we systematically remove the closest defender at the tackle moment, replacing his features with those of the second closest defender. We replace the second closest with the third closest, and so on. We do this, to produce a prediction for the hypothetical "what if" scenario, to compare to the existing tackle.
 
 3. **Yardline Prediction:** The evaluation of tackles involves the use of an EP model with the following features: .... Using our random forest, we predict the end-of-play yardline across the 1000 trees and consider these predictions as inputs for the EP model. 
 
@@ -82,10 +82,12 @@ This process yields the tackle's value *PEP* (for prevented Expected Points) wit
 
 Causal inference Ansatz, aber auf g(y) also EP Ebene.
 
+From a mathematical perspective, we want to obtain the mean expected points, given the conditional distribution of the end of play yardline produced by our model. More formally, letting the mapping $g$ represent the calculation of expected points based on the end of play yardline $y$ we are interested in
+
 $$
 \text{E}(g(y)) = \int_{0}^\infty g(y) \: \hat{f} (y \mid x) \: dy
 $$
-Instead of a two-step procedure, first obtaining a kernel density estimate from the individual tree predictions to then integrate numerically, we treat the tree-predictions $\hat{y}_1, \dots, \hat{y}_{1000}$ as samples from the conditional density and approximate the above expectation via the Monte Carlo estimate
+Instead of a two-step procedure, first obtaining a kernel density estimate from the individual tree predictions (introducing subjectivity in bandwidth choice) and then integrating numerically, we treat the tree-predictions $\hat{y}_1, \dots, \hat{y}_{1000}$ as samples from the conditional density and approximate the above expectation via the Monte Carlo estimate
 $$
 \frac{1}{1000} \sum_{i=1}^{1000} g(\hat{y}_i).
 $$
