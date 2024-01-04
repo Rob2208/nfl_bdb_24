@@ -5,8 +5,33 @@ date: "`r format(Sys.time(), '%d/%m/%y')`"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, echo = FALSE, warning=FALSE, message=FALSE, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(flextable)
+library(ftExtra)
+library(scales)
+library(reactable)
+library(reactablefmtr)
+library(RCurl)
+library(htmltools)
+library(crosstalk)
+library(plotrix)
+
+pbp_data_bdb <- read.csv("data/plays.csv") %>% 
+  mutate(uId = paste(gameId,playId,sep = "_"))
+
+tackle_list <- readRDS("data/tackles_info_data_trw1-3.rds")
+
+tackles <- tackle_list[[1]]
+tackle_info_real2 <- tackle_list[[2]]
+tackle_info_simple2 <- tackle_list[[3]]
+tackle_pred_real <- tackle_list[[4]]
+tackle_pred_s <- tackle_list[[5]]
+tackle_vals <- tackle_list[[6]] 
+best_tacklers <- tackle_list[[7]]
+
 ```
 
 > "Football is two things. It's blocking and tackling."
@@ -80,11 +105,301 @@ For each tackle, we systematically remove the closest defender at the tackle mom
 #### 3. Yardline Prediction 
 Using the trained random forest, we predict the end-of-play yardline across the 1000 trees. Using a kernel density estimator for visualization, we can plot the dynamically evolving conditional density estimation withing any given play.
 
-<span style="color: red;">Animation mit Dichteschätzung</span>
+```{r animation, fig.show='animate', ffmpeg.format='gif', dev='jpeg', echo = FALSE,fig.width= 8,fig.height=8}
+library(scales)
+
+coldens = "chartreuse1"
+collos = "purple"
+coleop = "darkgreen"
+coloff = "blue"
+coldef = "red"
+
+ex_play <- readRDS("data/example_play_for_anim3.rds")
+gpId <- ex_play[[1]]
+tracking_play <- ex_play[[2]]
+play_train <- ex_play[[3]]
+pred <- ex_play[[4]]
+pbp_info <- ex_play[[5]]
+
+
+par(mfrow = c(2,1), oma = c(5,4,0,0) + 0.1, mar = c(0, 0, 0, 2) + 0.1)
+for(i in 1:(nrow(pred)-7)){
+  plot(tracking_play$x_bc[i], tracking_play$y_bc[i], pch = 1, lwd = 6, col = coloff, 
+       xlim = c(0,min(round(max(tracking_play$x_bc),-1)+30,100)), ylim = c(-53.3/2, 53.3/2), 
+       xlab = "", ylab = "", bty = "n",xaxt = "n", yaxt = "n")
+  segments(x0 = 1:20 *5,
+           y0 = 53.3/2,
+           x1 = 1:20 *5,
+           y1 = -53.3/2,
+           col = "lightgray", lwd = 0.5)
+  segments(x0 = c(0,0),
+           y0 = c(53.3/2,-53.3/2),
+           x1 = c(100,100),
+           y1 = c(53.3/2,-53.3/2),
+           lwd = 1.5)
+  
+  segments(x0 = pbp_info$yardline_100,
+           y0 = 53.3/2,
+           x1 = pbp_info$yardline_100,
+           y1 = -53.3/2,
+           col = collos,lty = 2)
+  #abline(v = tackle_info$yardline_100, col = collos,lty = 2) # line of scrimmage
+  
+  segments(x0 = 0,
+           y0 = 53.3/2,
+           x1 = 0,
+           y1 = -53.3/2,
+           lwd = 1.5)
+  #abline(v = 0, lwd = 1.5) # endzone
+  
+  segments(x0 = pbp_info$true_yardline,
+           y0 = 53.3/2,
+           x1 = pbp_info$true_yardline,
+           y1 = -53.3/2,
+           col = coleop,lty = 2)
+  
+  # plot predicted yard end yard line
+  for(j in 1:1000){
+    segments(x0 = max(tracking_play$x_bc[i]-pred[i,j],0),
+             y0 = 53.3/2,
+             x1 = max(tracking_play$x_bc[i]-pred[i,j],0),
+             y1 = -53.3/2,
+             lwd = 2, col = alpha(coldens, 0.01))
+    #abline(v = tackle_frame$x_bc-pred_r[j], lwd = 2, col = alpha(coldens, 0.01))
+  }
+  segments(x0 = max(tracking_play$x_bc[i] - mean(pred[i,]),0),
+           y0 = 53.3/2,
+           x1 = max(tracking_play$x_bc[i] - mean(pred[i,]),0),
+           y1 = -53.3/2,
+           col = 1, lwd = 2)
+  #abline(v = tackle_frame$x_bc - mean(pred_r), col = 1, lwd = 2) # expected eop yardline
+  segments(x0 = max(tracking_play$x_bc[i] - mean(pred[i,]),0),
+           y0 = 53.3/2,
+           x1 = max(tracking_play$x_bc[i] - mean(pred[i,]),0),
+           y1 = -53.3/2,
+           col = coldens, lwd = 1)
+  #abline(v = tackle_frame$x_bc - mean(pred_r), col = coldens, lwd = 1) # expected eop yardline
+  
+  points(tracking_play$x_bc[i], tracking_play$y_bc[i], pch = 1, lwd = 6, col = coloff)
+  points(tracking_play$x_bc[i], tracking_play$y_bc[i], pch = 16, col = coloff)
+  
+  for(j in 2:11){
+    points(tracking_play[i,paste0("x_or_off", j)], tracking_play[i, paste0("y_or_off", j)], pch = 20, col = coloff)
+  }
+  for(j in 1:11){
+    points(tracking_play[i,paste0("x_or_def", j)], tracking_play[i, paste0("y_or_def", j)], pch = 20, col = coldef)
+  }
+  points(tracking_play$x_football[i], tracking_play$y_football[i], pch = 9, col = "coral1", lwd = 2)
+  legend(x = pbp_info$yardline_100-10, y = -16,
+         legend = c("Off","Def","Football","LOS","EOP"),
+         col = c(coloff,coldef,"coral1",collos,coleop),
+         pch = c(20,20,9,NA,NA), lty = c(NA,NA,NA,2,2),
+         cex = 0.7, ncol = 2,bg = "white") 
+  
+  plot(density(pmax(tracking_play$x_bc[i]-pred[i,],0), bw = 2.5,from = 0), 
+       col = coldens, lwd = 2, xlim = c(0,min(round(max(tracking_play$x_bc),-1)+30,100)), bty = "n", main = "", xlab = "eop yardline")
+  abline(v = 1:20 *5, col = "lightgray", lwd = 0.5)
+  abline(v = pbp_info$yardline_100, col = collos,lty = 2)
+  abline(v = 0, lwd = 1.5) # endzone
+  abline(v = max(tracking_play$x_bc[i] - mean(pred[i,]),0), col = 1, lwd = 2)
+  abline(v = max(tracking_play$x_bc[i] - mean(pred[i,]),0), col = coldens, lwd = 1)
+  abline(v = pbp_info$true_yardline, col = coleop,lty = 2)
+  
+  #Sys.sleep(0.1)
+}
+
+```
 
 For the tackle frames in particular, we obtain one predictive density, based on the original features, and one based on the replacement procedure explained above.
 
-<span style="color: red;">Plot mit beiden conditional density estimates (und closest defender mit besonderer point shape oder so)</span>
+```{r plot_new1, fig.height=10, fig.width= 12, echo = FALSE}
+
+vis_tackle_plays3 <- function(gpId,
+                              coldens = "chartreuse1",
+                              collos = "purple",
+                              coleop = "darkgreen",
+                              coloff = "blue",
+                              coldef = "red"){
+  tackle_frame <- tackles %>% filter(gameplayId == gpId)
+  tackle_info <- tackle_info_real2 %>% filter(gameplayId == gpId)
+  pred_r <- tackle_pred_real[which(tackle_info_real2$gameplayId == gpId),]
+  pred_s <- tackle_pred_s[which(tackle_info_simple2$gameplayId == gpId),]
+  
+  par(mfrow = c(2,2), oma = c(5,4,0,0) + 0.1, mar = c(0, 0, 0, 2) + 0.1)
+  
+  ########################
+  ### plot fields, first real, then hyp
+  
+  plot(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = coloff, 
+       xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)), ylim = c(-53.3/2, 53.3/2+5), 
+       xlab = "", ylab = "", bty = "n",xaxt = "n", yaxt = "n")
+  text(x=min(round(max(tackle_frame$x_bc),-1)+30,100)/2, y=53.3/2+2.5, "Real tackle frame", cex=1.5,font = 2) 
+  segments(x0 = 1:20 *5,
+           y0 = 53.3/2,
+           x1 = 1:20 *5,
+           y1 = -53.3/2,
+           col = "lightgray", lwd = 0.5)
+  segments(x0 = c(0,0),
+           y0 = c(53.3/2,-53.3/2),
+           x1 = c(100,100),
+           y1 = c(53.3/2,-53.3/2),
+           lwd = 1.5)
+  
+  segments(x0 = tackle_info$yardline_100,
+           y0 = 53.3/2,
+           x1 = tackle_info$yardline_100,
+           y1 = -53.3/2,
+           col = collos,lty = 2)
+  #abline(v = tackle_info$yardline_100, col = "purple",lty = 2) # line of scrimmage
+  
+  segments(x0 = 0,
+           y0 = 53.3/2,
+           x1 = 0,
+           y1 = -53.3/2,
+           lwd = 1.5)
+  #abline(v = 0, lwd = 1.5) # endzone
+  
+  segments(x0 = tackle_info$true_yardline,
+           y0 = 53.3/2,
+           x1 = tackle_info$true_yardline,
+           y1 = -53.3/2,
+           col = coleop,lty = 2)
+  
+  # plot predicted yard end yard line
+  for(j in 1:1000){
+    segments(x0 = max(tackle_frame$x_bc-pred_r[j],0),
+             y0 = 53.3/2,
+             x1 = max(tackle_frame$x_bc-pred_r[j],0),
+             y1 = -53.3/2,
+             lwd = 2, col = alpha(coldens, 0.01))
+    #abline(v = tackle_frame$x_bc-pred_r[j], lwd = 2, col = alpha(coldens, 0.01))
+  }
+  segments(x0 = max(tackle_frame$x_bc - mean(pred_r),0),
+           y0 = 53.3/2,
+           x1 = max(tackle_frame$x_bc - mean(pred_r),0),
+           y1 = -53.3/2,
+           col = 1, lwd = 2)
+  #abline(v = tackle_frame$x_bc - mean(pred_r), col = 1, lwd = 2) # expected eop yardline
+  segments(x0 = max(tackle_frame$x_bc - mean(pred_r),0),
+           y0 = 53.3/2,
+           x1 = max(tackle_frame$x_bc - mean(pred_r),0),
+           y1 = -53.3/2,
+           col = coldens, lwd = 1)
+  #abline(v = tackle_frame$x_bc - mean(pred_r), col = coldens, lwd = 1) # expected eop yardline
+  
+  points(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = coloff)
+  points(tackle_frame$x_bc, tackle_frame$y_bc, pch = 16, col = coloff)
+  
+  for(j in 2:11){
+    points(tackle_frame[,paste0("x_or_off", j)], tackle_frame[, paste0("y_or_off", j)], pch = 20, col = coloff)
+  }
+  for(j in 2:11){
+    points(tackle_frame[,paste0("x_or_def", j)], tackle_frame[, paste0("y_or_def", j)], pch = 20, col = coldef)
+  }
+  points(tackle_frame[,paste0("x_or_def", 1)], tackle_frame[, paste0("y_or_def", 1)], pch = 6, lwd = 3, col = coldef)
+  #points(trackingsub$x_football[i], trackingsub$y_football[i], pch = 9, col = "coral1", lwd = 2)
+  
+  ### hypothetical frame
+  
+  plot(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = coloff, 
+       xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)), ylim = c(-53.3/2, 53.3/2+5), 
+       xlab = "", ylab = "", bty = "n",xaxt = "n", yaxt = "n")
+  text(x=min(round(max(tackle_frame$x_bc),-1)+30,100)/2, y=53.3/2+2.5, "Hypothetical tackle frame", cex=1.5,font = 2) 
+  segments(x0 = 1:20 *5,
+           y0 = 53.3/2,
+           x1 = 1:20 *5,
+           y1 = -53.3/2,
+           col = "lightgray", lwd = 0.5)
+  segments(x0 = c(0,0),
+           y0 = c(53.3/2,-53.3/2),
+           x1 = c(100,100),
+           y1 = c(53.3/2,-53.3/2),
+           lwd = 1.5)
+  
+  segments(x0 = tackle_info$yardline_100,
+           y0 = 53.3/2,
+           x1 = tackle_info$yardline_100,
+           y1 = -53.3/2,
+           col = collos,lty = 2)
+  #abline(v = tackle_info$yardline_100, col = collos,lty = 2) # line of scrimmage
+  
+  segments(x0 = 0,
+           y0 = 53.3/2,
+           x1 = 0,
+           y1 = -53.3/2,
+           lwd = 1.5)
+  #abline(v = 0, lwd = 1.5) # endzone
+  
+  segments(x0 = tackle_info$true_yardline,
+           y0 = 53.3/2,
+           x1 = tackle_info$true_yardline,
+           y1 = -53.3/2,
+           col = coleop,lty = 2)
+  
+  # plot predicted yard end yard line
+  for(j in 1:1000){
+    segments(x0 = max(tackle_frame$x_bc-pred_s[j],0),
+             y0 = 53.3/2,
+             x1 = max(tackle_frame$x_bc-pred_s[j],0),
+             y1 = -53.3/2,
+             lwd = 2, col = alpha(coldens, 0.01))
+    #abline(v = tackle_frame$x_bc-pred_s[j], lwd = 2, col = alpha(coldens, 0.01))
+  }
+  segments(x0 = max(tackle_frame$x_bc - mean(pred_s),0),
+           y0 = 53.3/2,
+           x1 = max(tackle_frame$x_bc - mean(pred_s),0),
+           y1 = -53.3/2,
+           col = 1, lwd = 2)
+  #abline(v = tackle_frame$x_bc - mean(pred_s), col = 1, lwd = 2) # expected eop yardline
+  segments(x0 = max(tackle_frame$x_bc - mean(pred_s),0),
+           y0 = 53.3/2,
+           x1 = max(tackle_frame$x_bc - mean(pred_s),0),
+           y1 = -53.3/2,
+           col = coldens, lwd = 1)
+  #abline(v = tackle_frame$x_bc - mean(pred_s), col = coldens, lwd = 1) # expected eop yardline
+  
+  points(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = coloff)
+  points(tackle_frame$x_bc, tackle_frame$y_bc, pch = 16, col = coloff)
+  
+  for(j in 2:11){
+    points(tackle_frame[,paste0("x_or_off", j)], tackle_frame[, paste0("y_or_off", j)], pch = 20, col = coloff)
+  }
+  for(j in 1:10){
+    points(tackle_frame[,paste0("x_or_def", j+1)], tackle_frame[, paste0("y_or_def", j+1)], pch = 20, col = coldef)
+  }
+  #points(trackingsub$x_football[i], trackingsub$y_football[i], pch = 9, col = "coral1", lwd = 2)
+  
+  ########################
+  ### density lines: first real, then hypothetical
+  
+  plot(density(pmax(tackle_frame$x_bc-pred_r,0), bw = 2.5,from = 0), 
+       col = coldens, lwd = 2, xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)), bty = "n", main = "", xlab = "eop yardline")
+  abline(v = 1:20 *5, col = "lightgray", lwd = 0.5)
+  abline(v = tackle_info$yardline_100, col = collos,lty = 2)
+  abline(v = 0, lwd = 1.5) # endzone
+  abline(v = tackle_frame$x_bc - mean(pred_r), col = 1, lwd = 2)
+  abline(v = tackle_frame$x_bc - mean(pred_r), col = coldens, lwd = 1)
+  abline(v = tackle_info$true_yardline, col = coleop,lty = 2)
+  
+  
+  
+  
+  plot(density(pmax(tackle_frame$x_bc-pred_s,0), bw = 2.5,from = 0), 
+       col = coldens, lwd = 2, xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)), bty = "n", main = "", xlab = "eop yardline")
+  abline(v = 1:20 *5, col = "lightgray", lwd = 0.5)
+  abline(v = tackle_info$yardline_100, col = collos,lty = 2)
+  abline(v = 0, lwd = 1.5) # endzone
+  abline(v = tackle_frame$x_bc - mean(pred_s), col = 1, lwd = 2)
+  abline(v = tackle_frame$x_bc - mean(pred_s), col = coldens, lwd = 1)
+  abline(v = tackle_info$true_yardline, col = coleop,lty = 2)
+  
+}
+
+gpId <- 2022103003480
+
+vis_tackle_plays3(gpId)
+
+```
 
 #### 4. Tackle Evaluation 
 <!-- We set up an own EP model (similar to nflfastR, ...) and calculate the EPs for all 1000 predictions and average the outcomes (because of integral calculations, Monte Carlo approximation).  -->
@@ -97,8 +412,7 @@ From a mathematical perspective, we want to obtain the mean expected points, giv
 $$
 \text{E}(g(y) \mid x) = \int_{0}^\infty g(y) \: \hat{f} (y \mid x) \: dy
 $$
-For the mapping $g$ we set up our own EP model (similar to nflfastR) based on an Xgboost architecture (Chen and Guestrin, 2016) which, after model training, can be used to calculate the expected points, based on a given yardline and the <span style="color: red;">additional features ...</span>
-
+For the mapping $g$ we set up our own EP model based on an Xgboost architecture (Chen and Guestrin, 2016) which, after model training, can be used to calculate the expected points. In essence, we follow the implementation of the EP model from the nflfastR package (Carl and Baldwin, 2023). However, we have to derive all features used in the model solely from the predicted yards to be gained of each play. This makes the use of the model from the nflfastR package impractical. As features for our model we use the yard line of the play (adjusted LOS), yards to go, down, quarter, a home team indicator and timeouts remaining for each team (we omit features such as half seconds remaining, which are not extractable from the predicted yards to be gained).  <span style="color: red;">Wenn gewünscht kann ich noch Model comparisons (MAE oder so) vom unserem Modell zum Modell von nflfastR angeben. Um zu zeigen, dass unser Modell ähnlich gut funktioniert.</span>    
 
 Instead of a two-step procedure, first obtaining a kernel density estimate from the individual tree predictions (introducing subjectivity in bandwidth choice) and then integrating numerically, we treat the tree-predictions $\hat{y}_1, \dots, \hat{y}_{1000}$ as samples from the conditional density and approximate the above expectation via the Monte Carlo estimate
 $$
