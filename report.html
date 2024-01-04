@@ -437,10 +437,10 @@ acceleration, distance covered, orientation and direction.</p>
 <li>y-distance to the ball carrier.</li>
 </ul>
 <p>For defensive players only, we additionally compute the absolute
-difference of the defender direction and the angle of the shortest
+difference of the defender’s direction and the angle of the shortest
 segement between the defender and the ball carrier.</p>
 <p>Subsequently we order all players (in each frame) with respect to
-their euclidean distance to the ball carrier and standardise all
+their euclidean distance to the ball carrier and standardize all
 features.</p>
 <p>We did not rely on the event column to identify tackle events, but
 defined as the tackle event the frame in which the tacklers distance to
@@ -510,8 +510,8 @@ points based on the end of play yardline <span class="math inline">\(y\)</span> 
 \]</span> For the mapping <span class="math inline">\(g\)</span> we set
 up our own EP model (similar to nflfastR) based on an XGBoost
 architecture which, after model training, can be used to calculate the
-expected points, based on a yardline. More specifically, this model uses
-the features:</p>
+expected points, based on a given yardline and the additional features
+…</p>
 <p>Instead of a two-step procedure, first obtaining a kernel density
 estimate from the individual tree predictions (introducing subjectivity
 in bandwidth choice) and then integrating numerically, we treat the
