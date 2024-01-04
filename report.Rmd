@@ -114,6 +114,8 @@ where $x_0$ denotes the transformed features after removing the closest defender
 
 But we can also replace the second term by the expected points pased on the true observed end of play yard line, yielding a value of that specific tackle.
 
+![](plots/PEP_pipeline.jpg)
+
 ## Player evaluation
 
 - Tabelle
