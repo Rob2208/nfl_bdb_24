@@ -459,7 +459,8 @@ end of play yardline und “yards to be gained” einzeichnen.</p>
 <p>Our analysis comprises four steps:</p>
 <div id="model-training" class="section level4">
 <h4>1. Model Training</h4>
-<p>We train a model designed to predict the end-of-play yardline (see
+<p>We train a model designed to predict the yards to be gained which can
+be backtransformed into a prediction for the end-of-play yardline (see
 Yurko…). The model uses the previously described features, only
 including the 10 closest defenders. While accounting for the time-series
 nature of the data by using e.g. a transformer architecture, we do not
