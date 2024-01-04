@@ -40,12 +40,12 @@ best_tacklers <- tackle_list[[7]]
 
 ## Introduction
 
-Although this citation dates back several decades --- and American Football has of course changed since then --- tackling remains an integral aspect of the game. In contrast to decision-making scenarios faced by players, such as a quarterback's selection of a target for a pass, the decision for a tackle is more straightforward: a defense player should always promptly tackle the ball carrier.
+Although this citation dates back several decades --- and the sport of American Football has of course changed since then --- tackling remains an integral aspect of the game. In contrast to decision-making scenarios faced by players, such as a quarterback's selection of a target for a pass, the decision for a tackle is more straightforward: a defense player should always promptly tackle the ball carrier.
 
 When assessing players' tackles, one is usually interested in a hypothetical scenario: the potential outcome if a player were to miss a tackle. 
 Essentially, this involves quantifying the yards saved by a defensive player. Ideally, albeit impractically, running a play twice --- once with the defense player executing the tackle and a second time without --- would allow a direct comparison of the yardage gained by the ball carrier, thus enabling to evaluate the impact of the defensive player's tackle.
 
-Given the impracticability of such a hypothetical scenario, our approach involves approximating it by predicting the yardline of the ongoing play twice. First, we consider the inclusion of the closest defender who executed the tackle, and in a next step, we exclude this player. However, only quantifying the yards safed by a particular tackle does not suffice as an adequate measure of tackle value, due to lack of interpretability on a scale truely relevant to the game outcome. Therefore, we aim to produce a measure of tackle value on the scale of expected points (EP). EP can be viewed as a complicated mapping of the end of play yardline to the expected points in the next play. A sole point prediction of the mean yard line misses uncertainty propagation to the EP scale, such that we aim to produce a full conditional density estimate to calculate the expected points from. The metric derived from this methodology then quantifies the *prevented expected points (PEP)*.
+Given the impracticability of such a hypothetical scenario, our approach involves approximating it by predicting the yardline of the ongoing play twice. First, we consider the inclusion of the closest defender who executed the tackle, and in a next step, we exclude this player. However, only quantifying the yards saved by a particular tackle does not suffice as an adequate measure of tackle value, due to lack of interpretability on a scale truely relevant to the game outcome. Therefore, we aim to produce a measure of tackle value on the scale of expected points (EP). EP can be viewed as a complicated mapping of the end of play yardline to the expected points in the next play. A sole point prediction of the mean yard line misses uncertainty propagation to the EP scale, such that we aim to produce a full conditional density estimate to calculate the expected points from. The metric derived from this methodology then quantifies the *prevented expected points (PEP)*.
 
 <!-- We will find that such density estimates often show multimodality, which is especially relevant when large yards gained have a strong effect on the expected points. -->
 
@@ -59,17 +59,17 @@ To accurately predict the yardline at the end of any given play it is necessary 
 #### Change of coordinate system
 We transformed the coordinate system by 
 
-* redefining the x variable as the x distance to the endzone (such that all play directions are from right to left and the relevant endzone is at zero),
+* redefining the x-variable as the x-distance to the endzone (such that all play directions are from right to left and the relevant endzone is at zero),
 * centering the y-variable such that the center of the field is at zero,
 * changing the direction variable, such that zero degrees represents heading straight towards the relevant endzone.
 
 #### Response variable: Yards to be gained
-For each play, we defined the x position of the ball carrier in the last frame as the end-of-play yard line. The response variable we aim to predict is now *yards to be gained* as the difference of the x position of the ballcarrier in a given frame to the end-of-play yard line.
+For each play, we define the x-position of the ball carrier in the last frame as the end-of-play yard line. The response variable we aim to predict is now *yards to be gained* as the difference of the x-position of the ballcarrier in a given frame to the end-of-play yard line.
 
 #### Feature engineering
 For all players and the ball carrier we use the features already contained in the tracking data, namely x- and y-coordinates, speed, acceleration, distance covered, orientation and direction.
 
-For all players except the ball carrier we further compute
+For all players except the ball carrier we further compute the
 
 * euclidean distance to the ball carrier,
 * x-distance to the ball carrier,
@@ -77,11 +77,11 @@ For all players except the ball carrier we further compute
 
 For defensive players only, we additionally compute the absolute difference of the defender's direction and the angle of the shortest segement between the defender and the ball carrier.
 
-Subsequently we order all players (in each frame) with respect to their euclidean distance to the ball carrier and standardize all features.
+Subsequently, we order all players (in each frame) with respect to their euclidean distance to the ball carrier and standardize all features.
 
-We did not rely on the event column to identify tackle events, but defined as the tackle event the frame in which the tacklers distance to the ballcarrier is minimal within a given play.
+For the identification of tackle events, we do not rely on the event column. Instead, we define as the tackle event the frame in which the tacklers distance to the ballcarrier is minimal within a given play. <span style="color: red;">Hier müssen wir noch schreiben, dass wir die Spieler vorher aus dem Tackle Event Datensatz haben, oder?</span>
 
-<span style="color: red;">Schreiben welche plays wir rausgenommen haben und warum</span>
+<span style="color: red;">Schreiben welche plays wir rausgenommen haben und warum. Ja, würde ich kurz</span>
 
 <span style="color: red;">...add an example play to illustrate the "what if" scenario...
 Hier die end of play yardline und "yards to be gained" einzeichnen.</span>
@@ -93,17 +93,17 @@ Hier die end of play yardline und "yards to be gained" einzeichnen.</span>
 Our analysis comprises four steps:
 
 #### 1. Model Training
-We train a model designed to predict the yards to be gained which can be backtransformed into a prediction for the end-of-play yardline (see Yurko et al., 2020). The model uses the previously described features, only including the 10 closest defenders. While accounting for the time-series nature of the data by using e.g. a transformer architecture could be beneficial, we do not only want to obtain a point estimate for the yard line at the end of the play. Therefore, and to account for potential non-linear and interaction effects and to end up with a conditional density estimator $\hat{f}(y \mid x)$, we consider a random forest comprising 1000 individual trees, treating some accuracy in mean prediction for adequate uncertainty quantification. In general, modeling the uncertainty is important, as for example, in high-yardage plays, the variance of the end of play yardline is considerably larger, than in low-yardage plays.
+<span style="color: red;">We train a model designed to predict the yards to be gained which can be backtransformed into a prediction for the end-of-play yardline </span>(see Yurko et al., 2020). The model uses the previously described features, only including the ten closest defenders. <span style="color: red;">While accounting for the time-series nature of the data by using, for example, a transformer architecture could be beneficial, we do not only want to obtain a point estimate for the yard line at the end of the play.</span> Moreover, we aim to account for potential non-linear and interaction effects. Then, to end up with a conditional density estimator $\hat{f}(y \mid x)$, we consider a random forest comprising 1000 individual trees, <span style="color: red;">treating some accuracy in mean prediction for adequate uncertainty quantification.</span> In general, modeling the uncertainty is important, as for example, in high-yardage plays, the variance of the end of play yardline is considerably larger, than in low-yardage plays.
 
 <span style="color: red;">Plot prediction für low und high yardage plays, der zeigt, dass unsere Verteilung recht schmal und recht breit sein kann.</span>
 
 <span style="color: red;">RMSE und MAE reporten.</span>
 
 #### 2. Tackler Replacement Procedure 
-For each tackle, we systematically remove the closest defender at the tackle moment, replacing his features with those of the second closest defender. We replace the second closest with the third closest, and so on. We do this, to produce a prediction for the hypothetical "what if" scenario, to compare to the existing tackle.
+For each tackle, we systematically remove the closest defender at the moment of the tackle and replace the features with those of the second closest defender. Further on, we replace the second closest with the third closest, and so on. In this way, we come up with a prediction for a hypothetical "what if the tackle would be missed" scenario which then can be compared to the real existing tackle.
 
 #### 3. Yardline Prediction 
-Using the trained random forest, we predict the end-of-play yardline across the 1000 trees. Using a kernel density estimator for visualization, we can plot the dynamically evolving conditional density estimation withing any given play.
+Using the trained random forest, we predict the end-of-play yardline with 1000 trees. Using a kernel density estimator for visualization, we can plot the dynamically evolving conditional density estimation withing any given play.
 
 ```{r animation, fig.show='animate', ffmpeg.format='gif', dev='jpeg', echo = FALSE,fig.width= 8,fig.height=8}
 library(scales)
@@ -407,12 +407,12 @@ vis_tackle_plays3(gpId)
 <!-- This process yields the tackle's value *PEP* (for prevented Expected Points) with the respective tackler excluded from the data set.  -->
 
 <!-- Causal inference Ansatz, aber auf g(y) also EP Ebene. -->
-From a mathematical perspective, we want to obtain the mean expected points, given the conditional distribution of the end of play yardline produced by our model. More formally, letting the mapping $g$ represent the calculation of expected points based on the end of play yardline $y$ we are interested in
+From a mathematical perspective, we want to obtain the mean expected points, given the conditional distribution of the end of play yardline produced by our random forest. More formally, letting the mapping $g$ represent the calculation of expected points based on the end of play yardline $y$ we are interested in
 
 $$
 \text{E}(g(y) \mid x) = \int_{0}^\infty g(y) \: \hat{f} (y \mid x) \: dy
 $$
-For the mapping $g$ we set up our own EP model based on an Xgboost architecture (Chen and Guestrin, 2016) which, after model training, can be used to calculate the expected points. In essence, we follow the implementation of the EP model from the nflfastR package (Carl and Baldwin, 2023). However, we have to derive all features used in the model solely from the predicted yards to be gained of each play. This makes the use of the model from the nflfastR package impractical. As features for our model we use the yard line of the play (adjusted LOS), yards to go, down, quarter, a home team indicator and timeouts remaining for each team (we omit features such as half seconds remaining, which are not extractable from the predicted yards to be gained).  <span style="color: red;">Wenn gewünscht kann ich noch Model comparisons (MAE oder so) vom unserem Modell zum Modell von nflfastR angeben. Um zu zeigen, dass unser Modell ähnlich gut funktioniert.</span>    
+For the mapping $g$ we set up our own EP model based on an XGBoost architecture (Chen and Guestrin, 2016) which, after model training, can be used to calculate the expected points. In essence, we follow the implementation of the EP model from the nflfastR package (Carl and Baldwin, 2023). However, we have to derive all features used in the model solely from the predicted yards to be gained of each play. This makes the use of the model from the nflfastR package impractical. As features for our model we use the yard line of the play (adjusted LOS), yards to go, down, quarter, a home team indicator and timeouts remaining for each team (we omit features such as half seconds remaining, which are not extractable from the predicted yards to be gained).  <span style="color: red;">Wenn gewünscht kann ich noch Model comparisons (MAE oder so) vom unserem Modell zum Modell von nflfastR angeben. Um zu zeigen, dass unser Modell ähnlich gut funktioniert. RM: Ich glaube sowas ist gut für den Appendix.</span>    
 
 Instead of a two-step procedure, first obtaining a kernel density estimate from the individual tree predictions (introducing subjectivity in bandwidth choice) and then integrating numerically, we treat the tree-predictions $\hat{y}_1, \dots, \hat{y}_{1000}$ as samples from the conditional density and approximate the above expectation via the Monte Carlo estimate
 $$
@@ -448,6 +448,6 @@ All code for data preprocessing, model training, prediction and player evaluatio
 ## References
 
 * Carl S, Baldwin B (2023). nflfastR: Functions to Efficiently Access NFL Play by Play Data. R package version 4.6.0.9000, https://github.com/nflverse/nflfastR, https://www.nflfastr.com/.
-* Chen, T., & Guestrin, C. (2016). Xgboost: A scalable tree boosting system. In Proceedings of the 22nd acm sigkdd international conference on knowledge discovery and data mining (pp. 785-794).
+* Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. In Proceedings of the 22nd acm sigkdd international conference on knowledge discovery and data mining (pp. 785-794).
 * Yurko, R., Matano, F., Richardson, L. F., Granered, N., Pospisil, T., Pelechrinis, K., & Ventura, S. L. (2020). Going deep: models for continuous-time within-play valuation of game outcomes in American football with tracking data. Journal of Quantitative Analysis in Sports, 16(2), 163-182.
 
