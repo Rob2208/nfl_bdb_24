@@ -98,7 +98,7 @@ From a mathematical perspective, we want to obtain the mean expected points, giv
 $$
 \text{E}(g(y) \mid x) = \int_{0}^\infty g(y) \: \hat{f} (y \mid x) \: dy
 $$
-For the mapping $g$ we set up our own EP model (similar to nflfastR) based on an XGBoost architecture (Chen and Guestrin, 2016) which, after model training, can be used to calculate the expected points, based on a given yardline and the additional features ...
+For the mapping $g$ we set up our own EP model (similar to nflfastR) based on an Xgboost architecture (Chen and Guestrin, 2016) which, after model training, can be used to calculate the expected points, based on a given yardline and the additional features ...
 
 
 Instead of a two-step procedure, first obtaining a kernel density estimate from the individual tree predictions (introducing subjectivity in bandwidth choice) and then integrating numerically, we treat the tree-predictions $\hat{y}_1, \dots, \hat{y}_{1000}$ as samples from the conditional density and approximate the above expectation via the Monte Carlo estimate
