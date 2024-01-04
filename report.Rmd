@@ -72,9 +72,13 @@ RMSE und MAE reporten.
 
 2. **Tackler Replacement Procedure:** For each tackle, we systematically remove the closest defender at the tackle moment, replacing his features with those of the second closest defender. We replace the second closest with the third closest, and so on. We do this, to produce a prediction for the hypothetical "what if" scenario, to compare to the existing tackle.
 
-3. **Yardline Prediction:** The evaluation of tackles involves the use of an EP model with the following features: .... Using our random forest, we predict the end-of-play yardline across the 1000 trees and consider these predictions as inputs for the EP model. 
+3. **Yardline Prediction:** Using the trained random forest, we predict the end-of-play yardline across the 1000 trees. Using a kernel density estimator for visualization, we can plot the dynamically evolving conditional density estimation withing any given play.
 
 Animation mit Dichteschätzung
+
+For the tackle frames in particular, we obtain one predictive density, based on the original features, and one based on the replacement procedure explained above.
+
+Plot mit beiden conditional density estimates (und closest defender mit besonderer point shape oder so)
 
 4. **Tackle Evaluation:** We set up an own EP model (similar to nflfastR, ...) and calculate the EPs for all 1000 predictions and average the outcomes (because of integral calculations, Monte Carlo approximation). 
 Es gibt zwei Möglichkeiten (echte + expected mit full player) einen Tackle Value zu berechnen, wir nehmen Möglichkeit 2 
