@@ -79,7 +79,7 @@ For defensive players only, we additionally compute the absolute difference of t
 
 Subsequently, we order all players (in each frame) with respect to their euclidean distance to the ball carrier and standardize all features.
 
-For the identification of tackle events, we do not rely on the event column. Instead, we define as the tackle event the frame in which the tacklers distance to the ballcarrier is minimal within a given play. <span style="color: red;">Hier müssen wir noch schreiben, dass wir die Spieler vorher aus dem Tackle Event Datensatz haben, oder?</span>
+For the identification of tackle events, we do not rely on the event column. Instead, we define as the tackle event the frame in which the distance of the tackler (whom we derive from the tackle event data set) to the ballcarrier is minimal within a given play. 
 
 <span style="color: red;">Schreiben welche plays wir rausgenommen haben und warum. Ja, würde ich kurz</span>
 
