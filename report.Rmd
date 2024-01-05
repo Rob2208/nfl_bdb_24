@@ -110,11 +110,11 @@ Using the trained random forest, we predict the end-of-play yard line with 1000 
 ```{r animation, fig.show='animate', ffmpeg.format='gif', dev='jpeg', echo = FALSE,fig.width= 8,fig.height=8}
 library(scales)
 
-coldens = "chartreuse1"
-collos = "purple"
-coleop = "darkgreen"
-coloff = "blue"
-coldef = "red"
+coldens = "lightskyblue"
+collos = "black"
+coleop = "navyblue"
+coloff = "dodgerblue"
+coldef = "brown1"
 
 ex_play <- readRDS("data/example_play_for_anim3.rds")
 gpId <- ex_play[[1]]
@@ -144,7 +144,7 @@ for(i in 1:(nrow(pred)-7)){
            y0 = 53.3/2,
            x1 = pbp_info$yardline_100,
            y1 = -53.3/2,
-           col = collos,lty = 2)
+           col = collos, lty = 2, lwd = 2)
   #abline(v = tackle_info$yardline_100, col = collos,lty = 2) # line of scrimmage
   
   segments(x0 = 0,
@@ -158,7 +158,7 @@ for(i in 1:(nrow(pred)-7)){
            y0 = 53.3/2,
            x1 = pbp_info$true_yardline,
            y1 = -53.3/2,
-           col = coleop,lty = 2)
+           col = coleop, lty = 2, lwd = 2)
   
   # plot predicted yard end yard line
   for(j in 1:1000){
@@ -166,7 +166,7 @@ for(i in 1:(nrow(pred)-7)){
              y0 = 53.3/2,
              x1 = max(tracking_play$x_bc[i]-pred[i,j],0),
              y1 = -53.3/2,
-             lwd = 2, col = alpha(coldens, 0.01))
+             lwd = 5, col = alpha(coldens, 0.002))
     #abline(v = tackle_frame$x_bc-pred_r[j], lwd = 2, col = alpha(coldens, 0.01))
   }
   segments(x0 = max(tracking_play$x_bc[i] - mean(pred[i,]),0),
@@ -179,10 +179,10 @@ for(i in 1:(nrow(pred)-7)){
            y0 = 53.3/2,
            x1 = max(tracking_play$x_bc[i] - mean(pred[i,]),0),
            y1 = -53.3/2,
-           col = coldens, lwd = 1)
+           col = coldens, lwd = 2)
   #abline(v = tackle_frame$x_bc - mean(pred_r), col = coldens, lwd = 1) # expected eop yardline
   
-  points(tracking_play$x_bc[i], tracking_play$y_bc[i], pch = 1, lwd = 6, col = coloff)
+  points(tracking_play$x_bc[i], tracking_play$y_bc[i], pch = 2, lwd = 6, col = coloff)
   points(tracking_play$x_bc[i], tracking_play$y_bc[i], pch = 16, col = coloff)
   
   for(j in 2:11){
@@ -196,16 +196,17 @@ for(i in 1:(nrow(pred)-7)){
          legend = c("Off","Def","Football","LOS","EOP"),
          col = c(coloff,coldef,"coral1",collos,coleop),
          pch = c(20,20,9,NA,NA), lty = c(NA,NA,NA,2,2),
-         cex = 0.7, ncol = 2,bg = "white") 
+         lwd = c(NA,NA,NA,2,2),
+         cex = 0.7, ncol = 2, bg = "white") 
   
   plot(density(pmax(tracking_play$x_bc[i]-pred[i,],0), bw = 2.5,from = 0), 
        col = coldens, lwd = 2, xlim = c(0,min(round(max(tracking_play$x_bc),-1)+30,100)), bty = "n", main = "", xlab = "eop yardline")
   abline(v = 1:20 *5, col = "lightgray", lwd = 0.5)
-  abline(v = pbp_info$yardline_100, col = collos,lty = 2)
+  abline(v = pbp_info$yardline_100, col = collos, lty = 2, lwd = 2)
   abline(v = 0, lwd = 1.5) # endzone
   abline(v = max(tracking_play$x_bc[i] - mean(pred[i,]),0), col = 1, lwd = 2)
-  abline(v = max(tracking_play$x_bc[i] - mean(pred[i,]),0), col = coldens, lwd = 1)
-  abline(v = pbp_info$true_yardline, col = coleop,lty = 2)
+  abline(v = max(tracking_play$x_bc[i] - mean(pred[i,]),0), col = coldens, lwd = 2)
+  abline(v = pbp_info$true_yardline, col = coleop, lty = 2, lwd = 2)
   
   #Sys.sleep(0.1)
 }
@@ -226,11 +227,11 @@ pred_r <- ex_play_r_vs_h[[3]]
 pred_s <- ex_play_r_vs_h[[4]]
 
 vis_tackle_plays3 <- function(gpId,
-                              coldens = "chartreuse1",
-                              collos = "purple",
-                              coleop = "darkgreen",
-                              coloff = "blue",
-                              coldef = "red"){
+                              coldens = "lightskyblue",
+                              collos = "black",
+                              coleop = "navyblue",
+                              coloff = "dodgerblue",
+                              coldef = "brown1"){
   
   par(mfrow = c(2,2), oma = c(5,4,0,0) + 0.1, mar = c(0, 0, 0, 2) + 0.1)
   
@@ -256,7 +257,7 @@ vis_tackle_plays3 <- function(gpId,
            y0 = 53.3/2,
            x1 = tackle_info$yardline_100,
            y1 = -53.3/2,
-           col = collos,lty = 2)
+           col = collos, lty = 2, lwd = 2)
   #abline(v = tackle_info$yardline_100, col = "purple",lty = 2) # line of scrimmage
   
   segments(x0 = 0,
@@ -270,7 +271,7 @@ vis_tackle_plays3 <- function(gpId,
            y0 = 53.3/2,
            x1 = tackle_info$true_yardline,
            y1 = -53.3/2,
-           col = coleop,lty = 2)
+           col = coleop, lty = 2, lwd = 2)
   
   # plot predicted yard end yard line
   for(j in 1:1000){
@@ -278,7 +279,7 @@ vis_tackle_plays3 <- function(gpId,
              y0 = 53.3/2,
              x1 = max(tackle_frame$x_bc-pred_r[j],0),
              y1 = -53.3/2,
-             lwd = 2, col = alpha(coldens, 0.01))
+             lwd = 5, col = alpha(coldens, 0.002))
     #abline(v = tackle_frame$x_bc-pred_r[j], lwd = 2, col = alpha(coldens, 0.01))
   }
   segments(x0 = max(tackle_frame$x_bc - mean(pred_r),0),
@@ -291,7 +292,7 @@ vis_tackle_plays3 <- function(gpId,
            y0 = 53.3/2,
            x1 = max(tackle_frame$x_bc - mean(pred_r),0),
            y1 = -53.3/2,
-           col = coldens, lwd = 1)
+           col = coldens, lwd = 2)
   #abline(v = tackle_frame$x_bc - mean(pred_r), col = coldens, lwd = 1) # expected eop yardline
   
   points(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = coloff)
@@ -327,7 +328,7 @@ vis_tackle_plays3 <- function(gpId,
            y0 = 53.3/2,
            x1 = tackle_info$yardline_100,
            y1 = -53.3/2,
-           col = collos,lty = 2)
+           col = collos, lty = 2, lwd = 2)
   #abline(v = tackle_info$yardline_100, col = collos,lty = 2) # line of scrimmage
   
   segments(x0 = 0,
@@ -341,7 +342,7 @@ vis_tackle_plays3 <- function(gpId,
            y0 = 53.3/2,
            x1 = tackle_info$true_yardline,
            y1 = -53.3/2,
-           col = coleop,lty = 2)
+           col = coleop, lty = 2, lwd = 2)
   
   # plot predicted yard end yard line
   for(j in 1:1000){
@@ -349,7 +350,7 @@ vis_tackle_plays3 <- function(gpId,
              y0 = 53.3/2,
              x1 = max(tackle_frame$x_bc-pred_s[j],0),
              y1 = -53.3/2,
-             lwd = 2, col = alpha(coldens, 0.01))
+             lwd = 5, col = alpha(coldens, 0.002))
     #abline(v = tackle_frame$x_bc-pred_s[j], lwd = 2, col = alpha(coldens, 0.01))
   }
   segments(x0 = max(tackle_frame$x_bc - mean(pred_s),0),
@@ -362,7 +363,7 @@ vis_tackle_plays3 <- function(gpId,
            y0 = 53.3/2,
            x1 = max(tackle_frame$x_bc - mean(pred_s),0),
            y1 = -53.3/2,
-           col = coldens, lwd = 1)
+           col = coldens, lwd = 2)
   #abline(v = tackle_frame$x_bc - mean(pred_s), col = coldens, lwd = 1) # expected eop yardline
   
   points(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = coloff)
@@ -382,11 +383,11 @@ vis_tackle_plays3 <- function(gpId,
   plot(density(pmax(tackle_frame$x_bc-pred_r,0), bw = 2.5,from = 0), 
        col = coldens, lwd = 2, xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)), bty = "n", main = "", xlab = "eop yardline")
   abline(v = 1:20 *5, col = "lightgray", lwd = 0.5)
-  abline(v = tackle_info$yardline_100, col = collos,lty = 2)
+  abline(v = tackle_info$yardline_100, col = collos, lty = 2, lwd = 2)
   abline(v = 0, lwd = 1.5) # endzone
   abline(v = tackle_frame$x_bc - mean(pred_r), col = 1, lwd = 2)
-  abline(v = tackle_frame$x_bc - mean(pred_r), col = coldens, lwd = 1)
-  abline(v = tackle_info$true_yardline, col = coleop,lty = 2)
+  abline(v = tackle_frame$x_bc - mean(pred_r), col = coldens, lwd = 2)
+  abline(v = tackle_info$true_yardline, col = coleop, lty = 2, lwd = 2)
   
   
   
@@ -394,11 +395,11 @@ vis_tackle_plays3 <- function(gpId,
   plot(density(pmax(tackle_frame$x_bc-pred_s,0), bw = 2.5,from = 0), 
        col = coldens, lwd = 2, xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)), bty = "n", main = "", xlab = "eop yardline")
   abline(v = 1:20 *5, col = "lightgray", lwd = 0.5)
-  abline(v = tackle_info$yardline_100, col = collos,lty = 2)
+  abline(v = tackle_info$yardline_100, col = collos, lty = 2, lwd = 2)
   abline(v = 0, lwd = 1.5) # endzone
   abline(v = tackle_frame$x_bc - mean(pred_s), col = 1, lwd = 2)
-  abline(v = tackle_frame$x_bc - mean(pred_s), col = coldens, lwd = 1)
-  abline(v = tackle_info$true_yardline, col = coleop,lty = 2)
+  abline(v = tackle_frame$x_bc - mean(pred_s), col = coldens, lwd = 2)
+  abline(v = tackle_info$true_yardline, col = coleop, lty = 2, lwd = 2)
   
 }
 
