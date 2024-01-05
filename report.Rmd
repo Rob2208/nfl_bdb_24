@@ -22,7 +22,7 @@ library(plotrix)
 pbp_data_bdb <- read.csv("data/plays.csv") %>% 
   mutate(uId = paste(gameId,playId,sep = "_"))
 
-tackle_list <- readRDS("data/tackles_info_data_trw1-3.rds")
+tackle_list <- readRDS("data/tackles_info_data_full_oos.rds")
 
 tackles <- tackle_list[[1]]
 tackle_info_real2 <- tackle_list[[2]]
@@ -214,16 +214,19 @@ For the tackle frames in particular, we obtain one predictive density, based on 
 
 ```{r plot_new1, fig.height=10, fig.width= 12, echo = FALSE}
 
+ex_play_r_vs_h <- readRDS("data/ex_play_vis_r_vs_h.rds")
+
+tackle_frame <- ex_play_r_vs_h[[1]]
+tackle_info <- ex_play_r_vs_h[[2]]
+pred_r <- ex_play_r_vs_h[[3]]
+pred_s <- ex_play_r_vs_h[[4]]
+
 vis_tackle_plays3 <- function(gpId,
                               coldens = "chartreuse1",
                               collos = "purple",
                               coleop = "darkgreen",
                               coloff = "blue",
                               coldef = "red"){
-  tackle_frame <- tackles %>% filter(gameplayId == gpId)
-  tackle_info <- tackle_info_real2 %>% filter(gameplayId == gpId)
-  pred_r <- tackle_pred_real[which(tackle_info_real2$gameplayId == gpId),]
-  pred_s <- tackle_pred_s[which(tackle_info_simple2$gameplayId == gpId),]
   
   par(mfrow = c(2,2), oma = c(5,4,0,0) + 0.1, mar = c(0, 0, 0, 2) + 0.1)
   
@@ -430,6 +433,112 @@ where $x_0$ denotes the transformed features after removing the closest defender
 ![](plots/PEP_pipeline.jpg)
 
 ## Player evaluation
+
+```{r players, echo = FALSE, warning=FALSE, message=FALSE}
+
+make_pal <- function(value,col_low = "darkred",col_high = "darkgreen",nq = 10){
+  colourer <- col_quantile(
+    palette = c(col_low,col_high),
+    domain = c(min(value), max(value)),
+    n = nq)
+  rev(names(table(colourer(value))))
+}
+
+data <- best_tacklers %>% select(displayName,club,url,position,n_tackles,
+                           sum_tackle_gains,sum_tackle_gains2,
+                           avg_per_tackle,avg_per_tackle2)
+
+crosstalk_data <- SharedData$new(data)
+
+#url.logo <- getURL("https://raw.githubusercontent.com/statsbylopez/BlogPosts/master/nfl_teamlogos.csv")
+#df.logos <- read.csv(text = url.logo)
+
+#best_tacklers <- best_tacklers %>%
+#  left_join(df.logos , by = c("club" = "team_code"))
+
+
+position_filter <- filter_checkbox(
+  id = "pos",
+  label = "Position",
+  sharedData = crosstalk_data,
+  group = ~ position,
+  inline = TRUE
+)
+
+n_tackles_filter <- filter_slider(
+  id = "n_tackles",
+  label = "Number of tackles",
+  sharedData = crosstalk_data,
+  column = ~ n_tackles,
+  ticks = TRUE,
+  dragRange = FALSE,
+  step = 1,
+  width = "50%"
+)
+
+tbl <- reactable(crosstalk_data,
+  bordered = TRUE,
+  defaultSorted = "sum_tackle_gains2",
+  defaultSortOrder = "desc",
+  
+  columns = list(
+    displayName = colDef(
+      name = "Name"
+    ),
+    club = colDef(
+      name = "Team"
+    ),
+    url = colDef(
+      name = "Team Logo",
+      maxWidth = 70,
+      align = "center",
+      cell = embed_img(height = 25, width = 40)
+    ),
+    position = colDef(
+      name = "Position"
+    ),
+    n_tackles = colDef(
+      name = "# Tackles",
+      maxWidth = 50
+    ),
+    sum_tackle_gains = colDef(
+      name = "PEP (version 1)",
+      format = colFormat(digits = 2),
+      style = color_scales(best_tacklers, colors = make_pal(best_tacklers$sum_tackle_gains)),
+      maxWidth = 70
+    ),
+    sum_tackle_gains2 = colDef(
+      name = "PEP (version 2)",
+      format = colFormat(digits = 2),
+      style = color_scales(best_tacklers, colors = make_pal(best_tacklers$sum_tackle_gains2)),
+      maxWidth = 70
+    ),
+    avg_per_tackle = colDef(
+      name = "Avg PEP(v1)/Tackle",
+      format = colFormat(digits = 2),
+      style = color_scales(best_tacklers, colors = make_pal(best_tacklers$avg_per_tackle)),
+      maxWidth = 70
+    ),
+    avg_per_tackle2 = colDef(
+      name = "Avg PEP(v2)/Tackle",
+      format = colFormat(digits = 2),
+      style = color_scales(best_tacklers, colors = make_pal(best_tacklers$avg_per_tackle2)),
+      maxWidth = 70
+    )
+  )
+  
+)
+
+div(bscols(
+  widths = c(4, NA),
+    list(position_filter,
+         n_tackles_filter))
+)
+
+### display table
+div(tbl)
+
+```
 
 - Tabelle
 - PEP distribution by position
