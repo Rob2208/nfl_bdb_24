@@ -43,7 +43,7 @@ best_tacklers <- tackle_list[[7]]
 
 ## Introduction
 
-Although this citation dates back several decades --- and the sport of American Football has of course changed since then --- tackling remains an integral aspect of the game. In contrast to decision-making scenarios faced by players, such as a quarterback's selection of a target for a pass, the decision for a tackle is more straightforward: a defense player should always promptly tackle the ball carrier.
+Although this citation from one of the most successful head coaches in the history of the NFL dates back several decades --- and the sport of American Football has of course changed since then --- tackling remains an integral aspect of the game. In contrast to decision-making scenarios faced by players, such as a quarterback's selection of a target for a pass, the decision for a tackle is more straightforward: a defense player should always promptly tackle the ball carrier.
 
 When assessing players' tackles, one is usually interested in a hypothetical scenario: the potential outcome if a player were to miss a tackle. 
 Essentially, this involves quantifying the yards saved by a defensive player. Ideally, albeit impractically, running a play twice --- once with the defense player executing the tackle and a second time without --- would allow a direct comparison of the yardage gained by the ball carrier, thus enabling to evaluate the impact of the defensive player's tackle.
@@ -444,6 +444,8 @@ $$
 
 $\text{PEP}_1$ is similar to what is regarded a treatment effect in the literature representing the average expected points prevented by the tackle, given the specific game situation. In contrast, $\text{PEP}_2$ quantifies the prevented expected points by a real observed tackle. This is relevant for e.g. player evaluation as players might over- or underperform.  <span style="color: red;">Text überarbeiten?.</span>
 
+<span style="color: red;">Wir müssten zumindest noch kurz auf Training und Test set eingehen, oder?.</span>
+
 The below Figure See Figure \@ref(fig:overview). summarizes the above steps. 
 
 ```{r overview, fig.align = 'center', fig.cap = "Graphical overview of the steps of our analysis.", warning=FALSE, message=FALSE,echo = FALSE}
@@ -451,6 +453,8 @@ knitr::include_graphics("plots/PEP_pipeline.jpg")
 ```
 
 ## Player evaluation
+
+In this section we evaluate the *PEP* values at a player level for the test data. In particular, we calculate for each player his cumulative $\text{PEP}_1$ and $\text{PEP}_2$ and display these together with the average $\text{PEP}_1$ and $\text{PEP}_2$ per tackle. To get a reasonable average for these, we set the minimum number of tackles to ten. Users are then invited to compare players by selecting different teams and clicking on different positions.
 
 ```{r players, echo = FALSE, warning=FALSE, message=FALSE}
 
@@ -584,6 +588,8 @@ div(tbl)
 
 ```
 
+When comparing players in the above table across different positions, it quickly becomes apparent that, for example, defensive tackles do not have similar *PEP* values to safeties. So we want to compare the cumulative $\text{PEP}_2$ of players at the same position with players at other positions. In doing so, we can see in the lower left graph that some positions, as already indicated above, turn out to be low *PEP* positions. This is mainly due to the fact that defensive ends, nose tackles or defensive tackles are protected by linebackers, safeties and cornerbacks. On the other hand, inside linebackers have the highest *PEP* values. This is due to the fact that players in this position tackle the most. Comparing the average *PEP* per position in the bottom right graph, we can see that inside linebackers fall in the order of importance and are overtaken by cornerbacks and safeties. This can be explained by considering that they are often the last to tackle, before the opposing players gain many yards or even score a TD.  
+
 ```{r pos, fig.height=6, fig.width= 10, echo = FALSE, warning=FALSE, message=FALSE}
 
 library(ggpubr)
@@ -644,14 +650,12 @@ ggarrange(p1,p2,ncol = 2,nrow = 1)
 
 ```
 
-Rouven analysiert die Ergebnisse :-)
-
 ## Discussion
 In this contribution, we developed the metric *PEP* for quantifying the value of tackles. It allows practitioners to assess players, particularly in terms of their tackling abilities. 
-However, there are a few drawbacks that need to be taken into account during the evaluation process. Important considerations are the position and the defensive playing styles of teams. Cornerbacks and safeties are often more capable of making "touchdown-saving tackles", resulting in their values typically being higher. Furthermore, safeties who engage in riskier defensive strategies, such as those employed by Brian Flores, receive less support of their teammates in the backfield, which is why their metrics may be higher. 
-When taking such aspects into account, however, the metric we have developed can serve as an additional puzzle piece in the overall assessment of (defensive) players and might gain practical relevance in the process of scouting players and opponents.
-
-Future research: Turnover
+<span style="color: red;">Ole fasst zusammen und sagt wie toll unser Model ist :-) < description</span>
+However, there are some drawbacks that need to be taken into account during the evaluation process. One important consideration is the defensive playing style of teams. We have already seen that cornerbacks and safeties are often more likely to make "touchdown-saving tackles", so their scores tend to be higher. If safeties are also involved in riskier defensive strategies (e.g. in a Brian Flores defence) and therefore receive even less support from their teammates in the backfield, their values could increase even more. 
+Another area for future research is defensive turnovers. We neglected these plays in our analysis because their specific outcome was not compatible with our current EP model. In general, however, those tackles that lead to defensive turnovers are positive plays, for which players who often tackle *and* force the ball loose for a fumble (such as Haason Reddick) should be rewarded with extra-positive values.  
+In summary, the metrics we have developed can serve as an additional piece of the puzzle in the overall evaluation of (defensive) players, and may gain practical relevance in the process of scouting players and opponents.
 
 ## Code
 
