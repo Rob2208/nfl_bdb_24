@@ -17,7 +17,7 @@ library(reactablefmtr)
 library(RCurl)
 library(htmltools)
 library(crosstalk)
-library(plotrix)
+library(ggridges)
 
 pbp_data_bdb <- read.csv("data/plays.csv") %>% 
   mutate(uId = paste(gameId,playId,sep = "_"))
@@ -537,6 +537,41 @@ div(bscols(
 
 ### display table
 div(tbl)
+
+```
+
+```{r pos, fig.height=8, fig.width= 6, echo = FALSE, warning=FALSE, message=FALSE}
+
+pos_df <- best_tacklers %>% 
+  group_by(position) %>% 
+  summarise(avg = mean(sum_tackle_gains),
+            avg2 = mean(sum_tackle_gains2),
+            avg_n_tackles = mean(n_tackles),
+            n_players = n()) %>% 
+  arrange(desc(avg2)) %>% 
+  filter(position != "DB" )
+
+myorder <- pos_df %>% pull(position)
+
+best_tacklers_plot <- best_tacklers %>%
+  filter(position != "DB") %>%
+  mutate(position = factor(position, levels = rev(myorder)))
+
+colourer <- col_quantile(
+  palette = c("darkred","darkgreen"),
+  domain = c(min(pos_df$avg2), max(pos_df$avg2)),
+  n = 10)
+
+ggplot(
+  best_tacklers_plot, 
+  aes(x = sum_tackle_gains2, y = position,fill = position)
+) +
+  scale_fill_manual(values = alpha(rev(c("#006400", "#2B5F00", "#2B5F00", "#3F5900", "#4E5300", "#703B00", "#8B0000", "#8B0000", "#8B0000"))),0.2) +
+  stat_density_ridges(quantile_lines=TRUE,
+                      quantile_fun=function(x,...)c(mean(x)))+
+  theme(legend.position = "none")+
+  xlab("PEP")+
+  labs(title = 'Distribution of sum of PEP (version 2) values per position')
 
 ```
 
