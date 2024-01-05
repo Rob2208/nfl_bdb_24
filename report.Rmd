@@ -107,7 +107,13 @@ Using the trained random forest, we predict the end-of-play yard line with 1000 
 
 <span style="color: red;">add video + play< description</span>
 
-```{r animation, fig.show='animate', ffmpeg.format='gif', dev='jpeg', echo = FALSE,fig.width= 8,fig.height=8}
+<center>
+<video width="600" height="400" controls>
+  <source src="play_mov.mp4" type="video/mp4">
+</video>
+</center>
+
+```{r animation, fig.show='animate', ffmpeg.format='gif', dev='jpeg', echo = FALSE,fig.width= 8,fig.height=8,fig.align='center'}
 library(scales)
 
 coldens = "chartreuse1"
@@ -127,8 +133,9 @@ pbp_info <- ex_play[[5]]
 par(mfrow = c(2,1), oma = c(5,4,0,0) + 0.1, mar = c(0, 0, 0, 2) + 0.1)
 for(i in 1:(nrow(pred)-7)){
   plot(tracking_play$x_bc[i], tracking_play$y_bc[i], pch = 1, lwd = 6, col = coloff, 
-       xlim = c(0,min(round(max(tracking_play$x_bc),-1)+30,100)), ylim = c(-53.3/2, 53.3/2), 
+       xlim = c(0,min(round(max(tracking_play$x_bc),-1)+30,100)), ylim = c(-53.3/2, 53.3/2+5), 
        xlab = "", ylab = "", bty = "n",xaxt = "n", yaxt = "n")
+  text(x=min(round(max(tracking_play$x_bc),-1)+30,100)/2, y=53.3/2+2.5, pbp_info$desc, cex=.7)
   segments(x0 = 1:20 *5,
            y0 = 53.3/2,
            x1 = 1:20 *5,
@@ -437,9 +444,9 @@ $$
 
 $\text{PEP}_1$ is similar to what is regarded a treatment effect in the literature representing the average expected points prevented by the tackle, given the specific game situation. In contrast, $\text{PEP}_2$ quantifies the prevented expected points by a real observed tackle. This is relevant for e.g. player evaluation as players might over- or underperform.  <span style="color: red;">Text überarbeiten?.</span>
 
-The below Figure \ref{fig:overview} summarizes the above steps. 
+The below Figure See Figure \@ref(fig:overview). summarizes the above steps. 
 
-```{r ssa-logo, fig.align = 'center', fig.cap = "\\label{fig:overview} Graphical overview of the steps of our analysis.", warning=FALSE, message=FALSE}
+```{r overview, fig.align = 'center', fig.cap = "Graphical overview of the steps of our analysis.", warning=FALSE, message=FALSE,echo = FALSE}
 knitr::include_graphics("plots/PEP_pipeline.jpg")
 ```
 
@@ -447,13 +454,29 @@ knitr::include_graphics("plots/PEP_pipeline.jpg")
 
 ```{r players, echo = FALSE, warning=FALSE, message=FALSE}
 
-make_pal <- function(value,col_low = "red",col_high = "darkgreen",nq = 10){
+make_pal <- function(value,col_low = "red",col_middle = "skyblue",col_high = "darkgreen",nq = 10){
   colourer <- col_quantile(
-    palette = c(col_low,col_high),
+    palette = c(col_low,col_middle,col_high),
     domain = c(min(value), max(value)),
     n = nq)
   rev(names(table(colourer(value))))
 }
+
+make_pal2 <- function(value,col_low = "red",col_middle = "skyblue",col_high = "darkgreen",nq = 10){
+  colourer <- col_quantile(
+    palette = c(col_low,col_middle,col_high),
+    domain = c(min(value), max(value)),
+    n = nq)
+  colourer(value)
+}
+
+
+best_tacklers_u <- best_tacklers %>% filter(n_tackles >= 10,position != "DB") %>% 
+  mutate(col1 = make_pal2(sum_tackle_gains),
+         col2 = make_pal2(sum_tackle_gains2),
+         col3 = make_pal2(avg_per_tackle),
+         col4 = make_pal2(avg_per_tackle2))
+
 
 data <- best_tacklers %>% select(displayName,club,url,position,n_tackles,
                            sum_tackle_gains,sum_tackle_gains2,
@@ -516,25 +539,25 @@ tbl <- reactable(crosstalk_data,
     sum_tackle_gains = colDef(
       name = "PEP[1]",
       format = colFormat(digits = 2),
-      style = color_scales(best_tacklers, colors = make_pal(best_tacklers$sum_tackle_gains[best_tacklers$n_tackles >= 10])),
+      style = color_scales(best_tacklers_u, color_ref = "col1"),
       maxWidth = 80
     ),
     sum_tackle_gains2 = colDef(
       name = "PEP[2]",
       format = colFormat(digits = 2),
-      style = color_scales(best_tacklers, colors = make_pal(best_tacklers$sum_tackle_gains2[best_tacklers$n_tackles >= 10])),
+      style = color_scales(best_tacklers_u, color_ref = "col2"),
       maxWidth = 80
     ),
     avg_per_tackle = colDef(
       name = "Avg PEP[1]/Tackle",
       format = colFormat(digits = 2),
-      style = color_scales(best_tacklers, colors = make_pal(best_tacklers$avg_per_tackle[best_tacklers$n_tackles >= 10])),
+      style = color_scales(best_tacklers_u, color_ref = "col3"),
       maxWidth = 80
     ),
     avg_per_tackle2 = colDef(
       name = "Avg PEP[2]/Tackle",
       format = colFormat(digits = 2),
-      style = color_scales(best_tacklers, colors = make_pal(best_tacklers$avg_per_tackle2[best_tacklers$n_tackles >= 10])),
+      style = color_scales(best_tacklers_u, color_ref = "col4"),
       maxWidth = 80
     )
   )
@@ -552,7 +575,7 @@ div(tbl)
 
 ```
 
-```{r pos, fig.height=8, fig.width= 6, echo = FALSE, warning=FALSE, message=FALSE}
+```{r pos, fig.height=6, fig.width= 10, echo = FALSE, warning=FALSE, message=FALSE}
 
 library(ggpubr)
 
@@ -573,7 +596,7 @@ best_tacklers_plot <- best_tacklers %>%
   mutate(position = factor(position, levels = rev(myorder)))
 
 colourer <- col_quantile(
-  palette = c("darkred","darkgreen"),
+  palette = c("red","skyblue","darkgreen"),
   domain = c(min(pos_df$avg2), max(pos_df$avg2)),
   n = 10)
 
@@ -581,7 +604,7 @@ p1 <- ggplot(
   best_tacklers_plot, 
   aes(x = sum_tackle_gains2, y = position,fill = position)
 ) +
-  scale_fill_manual(values = alpha(rev(c("#006400", "#2B5F00", "#2B5F00", "#3F5900", "#4E5300", "#703B00", "#8B0000", "#8B0000", "#8B0000"))),0.2) +
+  scale_fill_manual(values = alpha(rev(c("#006400", "#327B3B", "#327B3B", "#4E926C", "#66AA9D", "#D0A19E", "#FF0000", "#FF0000", "#FF0000"))),0.2) +
   stat_density_ridges(quantile_lines=TRUE,
                       quantile_fun=function(x,...)c(mean(x)))+
   theme_minimal()+
@@ -599,7 +622,7 @@ p2 <- ggplot(
   best_tacklers_plot2, 
   aes(x = avg_per_tackle2, y = position,fill = position)
 ) +
-  scale_fill_manual(values = alpha(rev(c("#006400", "#2B5F00", "#2B5F00", "#3F5900", "#4E5300", "#703B00", "#8B0000", "#8B0000", "#8B0000"))),0.2) +
+  scale_fill_manual(values = alpha(rev(c("#006400", "#327B3B", "#327B3B", "#4E926C", "#66AA9D", "#D0A19E", "#FF0000", "#FF0000", "#FF0000"))),0.2) +
   stat_density_ridges(quantile_lines=TRUE,
                       quantile_fun=function(x,...)c(mean(x)))+
   theme_minimal()+
@@ -611,6 +634,7 @@ p2 <- ggplot(
 ggarrange(p1,p2,ncol = 2,nrow = 1)
 
 ```
+
 Rouven analysiert die Ergebnisse :-)
 
 ## Discussion
