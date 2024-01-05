@@ -113,7 +113,7 @@ Using the trained random forest, we predict the end-of-play yard line with 1000 
 </video>
 </center>
 
-```{r animation, fig.show='animate', ffmpeg.format='gif', dev='jpeg', echo = FALSE,fig.width= 8,fig.height=8,fig.align='center'}
+```{r animation, fig.show='animate', ffmpeg.format='gif', dev='jpeg', echo = FALSE,fig.width= 8,fig.height=8,fig.align='center',interval = 0.01}
 library(scales)
 
 coldens = "chartreuse1"
