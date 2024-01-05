@@ -500,6 +500,14 @@ position_filter <- filter_checkbox(
   inline = TRUE
 )
 
+team_filter <- filter_select(
+  id = "team",
+  label = "TEAM",
+  sharedData = crosstalk_data,
+  group = ~ club,
+)
+
+
 n_tackles_filter <- filter_slider(
   id = "n_tackles",
   label = "Number of tackles",
@@ -565,8 +573,9 @@ tbl <- reactable(crosstalk_data,
 )
 
 div(bscols(
-  widths = c(4, NA),
+  widths = c(4, NA,NA),
     list(position_filter,
+         team_filter,
          n_tackles_filter))
 )
 
