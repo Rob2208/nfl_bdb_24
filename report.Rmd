@@ -105,7 +105,7 @@ For each tackle, we systematically remove the closest defender at the moment of 
 #### 3. Yardline Prediction 
 Using the trained random forest, we predict the end-of-play yard line with 1000 trees. Using a kernel density estimator for visualization, we can plot the dynamically evolving conditional density estimation withing any given play.
 
-<span style="color: red;">add video + play< description</span>
+<span style="color: red;">For the purpose of illustration, we present a specific example play. The video below shows a successful passing play from the Detroit Lions against the Miami Dolphins. After a completed pass, the receiver (in this case Tight End TJ Hockenson) is able to gain a substantial amount of yards by evading a tackle and is finally stopped only 12 yards before the endzone.  </span>
 
 <center>
 <video width="600" height="400" controls>
@@ -113,7 +113,11 @@ Using the trained random forest, we predict the end-of-play yard line with 1000 
 </video>
 </center>
 
-```{r animation, fig.show='animate', ffmpeg.format='gif', dev='jpeg', echo = FALSE,fig.width= 8,fig.height=8,fig.align='center',interval = 0.01}
+<span style="color: red;"> Below we display an animation of that same play (in the transformed coordinate system). At each frame, we add the conditional density of the yards to be gained from our model. There are a few observations: First at beginning of the play the density is rather narrow, because the model expects a tackle from the closest defender. As soon as TJ Hockenson is able to evade the first tackle, the density changes. The variance of the yards to be gained distribution increases and we even observe a bimodal distribution with a lot of mass at the endzone. Finally, at the time of tackle the distribution becomes quite narrow again, as we only expect the runner to make a few more yards.</span>
+
+<span style="color: red;"> Formulierung in obigen text sollte noch verbessert werden. War nur ein erster Ansatz< description</span>
+
+```{r animation, fig.show='animate', ffmpeg.format='gif', dev='jpeg', echo = FALSE,fig.width= 8,fig.height=8,fig.align='center',interval = 0.4}
 library(scales)
 
 coldens = "chartreuse1"
