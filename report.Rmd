@@ -87,6 +87,139 @@ As we evaluate tackles by comparing a hypothetical outcome to the true end of pl
 <span style="color: red;">...add an example play to illustrate the "what if" scenario...
 Hier die end of play yardline und "yards to be gained" einzeichnen.</span>
 
+```{r plot_ex, fig.height=6, fig.width= 12, echo = FALSE}
+
+coldens = "#009E73"
+collos = "#CC79A7"
+coleop = "#999999"
+coloff = "#0072B2"
+coldef = "#D55E00"
+
+ex_play_r_vs_h <- readRDS("data/ex_play_vis_r_vs_h.rds")
+
+tackle_frame <- ex_play_r_vs_h[[1]]
+tackle_info <- ex_play_r_vs_h[[2]]
+pred_r <- ex_play_r_vs_h[[3]]
+pred_s <- ex_play_r_vs_h[[4]]
+
+par(mfrow = c(1,2), oma = c(5,4,0,0) + 0.1, mar = c(0, 0, 0, 2) + 0.1)
+
+########################
+### plot fields, first real, then hyp
+
+plot(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = coloff, 
+     xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)), ylim = c(-53.3/2, 53.3/2+5), 
+     xlab = "", ylab = "", bty = "n",xaxt = "n", yaxt = "n")
+text(x=min(round(max(tackle_frame$x_bc),-1)+30,100)/2, y=53.3/2+2.5, "Real tackle frame", cex=1.5,font = 2) 
+segments(x0 = 1:20 *5,
+         y0 = 53.3/2,
+         x1 = 1:20 *5,
+         y1 = -53.3/2,
+         col = "lightgray", lwd = 0.5)
+segments(x0 = c(0,0),
+         y0 = c(53.3/2,-53.3/2),
+         x1 = c(100,100),
+         y1 = c(53.3/2,-53.3/2),
+         lwd = 1.5)
+
+segments(x0 = tackle_info$yardline_100,
+         y0 = 53.3/2,
+         x1 = tackle_info$yardline_100,
+         y1 = -53.3/2,
+         col = collos,lty = 2)
+#abline(v = tackle_info$yardline_100, col = "purple",lty = 2) # line of scrimmage
+
+segments(x0 = 0,
+         y0 = 53.3/2,
+         x1 = 0,
+         y1 = -53.3/2,
+         lwd = 1.5)
+#abline(v = 0, lwd = 1.5) # endzone
+
+segments(x0 = tackle_info$true_yardline,
+         y0 = 53.3/2,
+         x1 = tackle_info$true_yardline,
+         y1 = -53.3/2,
+         col = coleop,lty = 2)
+
+segments(x0 = tackle_info$true_yardline,
+         y0 = tackle_frame$y_bc,
+         x1 = tackle_frame$x_bc,
+         y1 = tackle_frame$y_bc,
+         lty = 2)
+text(x = tackle_frame$x_bc+2,y = tackle_frame$y_bc-4,"yards to be gained",cex = 0.5,pos = 1)
+arrows(tackle_frame$x_bc+2,tackle_frame$y_bc-4.5,
+       tackle_frame$x_bc-4,tackle_frame$y_bc,angle = 20,length =0.1,lwd = 0.5)
+
+for(j in 2:11){
+  points(tackle_frame[,paste0("x_or_off", j)], tackle_frame[, paste0("y_or_off", j)], pch = 20, col = coloff)
+}
+for(j in 2:11){
+  points(tackle_frame[,paste0("x_or_def", j)], tackle_frame[, paste0("y_or_def", j)], pch = 20, col = coldef)
+}
+points(tackle_frame[,paste0("x_or_def", 1)], tackle_frame[, paste0("y_or_def", 1)], pch = 6, lwd = 3, col = coldef)
+
+plot(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = coloff, 
+     xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)), ylim = c(-53.3/2, 53.3/2+5), 
+     xlab = "", ylab = "", bty = "n",xaxt = "n", yaxt = "n")
+text(x=min(round(max(tackle_frame$x_bc),-1)+30,100)/2, y=53.3/2+2.5, "Hypothetical tackle frame", cex=1.5,font = 2) 
+segments(x0 = 1:20 *5,
+         y0 = 53.3/2,
+         x1 = 1:20 *5,
+         y1 = -53.3/2,
+         col = "lightgray", lwd = 0.5)
+segments(x0 = c(0,0),
+         y0 = c(53.3/2,-53.3/2),
+         x1 = c(100,100),
+         y1 = c(53.3/2,-53.3/2),
+         lwd = 1.5)
+
+segments(x0 = tackle_info$yardline_100,
+         y0 = 53.3/2,
+         x1 = tackle_info$yardline_100,
+         y1 = -53.3/2,
+         col = collos,lty = 2)
+#abline(v = tackle_info$yardline_100, col = collos,lty = 2) # line of scrimmage
+
+segments(x0 = 0,
+         y0 = 53.3/2,
+         x1 = 0,
+         y1 = -53.3/2,
+         lwd = 1.5)
+#abline(v = 0, lwd = 1.5) # endzone
+
+segments(x0 = 6,
+         y0 = 53.3/2,
+         x1 = 6,
+         y1 = -53.3/2,
+         col = coleop,lty = 2)
+text(x = 6, y = 0-10, "?",cex = 1.5,lwd = 2, pos = 4)
+
+segments(x0 = 0,
+         y0 = 53.3/2,
+         x1 = 0,
+         y1 = -53.3/2,
+         col = coleop,lty = 2)
+text(x = 0, y = 0, "?",cex = 1.5,lwd = 2, pos = 4)
+
+segments(x0 = 14,
+         y0 = 53.3/2,
+         x1 = 14,
+         y1 = -53.3/2,
+         col = coleop,lty = 2)
+text(x = 14, y = 0+15, "?",cex = 1.5,lwd = 2, pos = 4)
+
+for(j in 2:11){
+  points(tackle_frame[,paste0("x_or_off", j)], tackle_frame[, paste0("y_or_off", j)], pch = 20, col = coloff)
+}
+for(j in 1:10){
+  points(tackle_frame[,paste0("x_or_def", j+1)], tackle_frame[, paste0("y_or_def", j+1)], pch = 20, col = coldef)
+}
+
+
+
+```
+
 
 ## Analysis
 
@@ -121,11 +254,11 @@ Using the trained random forest, we predict the end-of-play yard line with 1000 
 ```{r animation, fig.show='animate', ffmpeg.format='gif', dev='jpeg', echo = FALSE,fig.width= 8,fig.height=8,fig.align='center',interval = 0.4}
 library(scales)
 
-coldens = "chartreuse1"
-collos = "purple"
-coleop = "darkgreen"
-coloff = "blue"
-coldef = "red"
+coldens = "#009E73"
+collos = "#CC79A7"
+coleop = "#999999"
+coloff = "#0072B2"
+coldef = "#D55E00"
 
 ex_play <- readRDS("data/example_play_for_anim3.rds")
 gpId <- ex_play[[1]]
@@ -416,7 +549,13 @@ vis_tackle_plays3 <- function(gpId,
 
 gpId <- 2022103003480
 
-vis_tackle_plays3(gpId)
+coldens = "#009E73"
+collos = "#CC79A7"
+coleop = "#999999"
+coloff = "#0072B2"
+coldef = "#D55E00"
+
+vis_tackle_plays3(gpId,coldens,collos,coleop,coloff,coldef)
 
 ```
 
