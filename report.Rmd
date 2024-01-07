@@ -423,7 +423,7 @@ vis_tackle_plays3(gpId)
 <!-- This process yields the tackle's value *PEP* (for prevented Expected Points) with the respective tackler excluded from the data set.  -->
 
 <!-- Causal inference Ansatz, aber auf g(y) also EP Ebene. -->
-From a mathematical perspective, we want to obtain the mean expected points, given the conditional distribution of the end-of-play yard line produced by our random forest. More formally, letting the mapping $g$ represent the calculation of expected points based on the end-of-play yard line $y$ we are interested in
+From a mathematical perspective, we want to obtain the mean expected points, given the conditional distribution of the end-of-play yard line produced by our random forest. More formally, letting the mapping $g$ represent the calculation of expected points based on the end-of-play yard line $Y$ we are interested in
 
 $$
 \text{E}(g(Y) \mid x) = \int_{0}^{100} g(y) \: \hat{f} (y \mid x) \: dy
