@@ -101,7 +101,7 @@ We train a model designed to predict the yards to be gained from which we can ca
 For each tackle, we systematically remove the closest defender at the moment of the tackle and replace the features with those of the second closest defender. Further on, we replace the second closest with the third closest, and so on. In this way, we come up with a prediction for a hypothetical "what if the tackle would be missed" scenario which then can be compared to the real existing tackle.
 
 #### 3. Yard Line Prediction 
-Using the trained random forest, we predict the end-of-play yard line with 1000 trees. Using a kernel density estimator for visualization, we can plot the dynamically evolving conditional density estimation withing any given play.
+Using the trained random forest, we predict the end-of-play yard line with 1000 trees. Using a kernel density estimator for visualization, we can plot the dynamically evolving conditional density estimate withing any given play.
 
 <span style="color: red;">For the purpose of illustration, we present a specific example play. The video below shows a successful passing play from the Detroit Lions against the Miami Dolphins. After a completed pass, the ball carrier (in this case Tight End TJ Hockenson) is able to gain a substantial amount of yards by evading a tackle and is finally stopped 12 yards before the endzone.  </span>
 
