@@ -479,6 +479,8 @@ make_pal2 <- function(value,col_low = "red",col_middle = "skyblue",col_high = "d
   colourer(value)
 }
 
+best_tacklers <- best_tacklers %>% 
+  mutate(position = if_else(position == "MLB","ILB",position))
 
 best_tacklers_u <- best_tacklers %>% filter(n_tackles >= 10,position != "DB") %>% 
   mutate(col1 = make_pal2(sum_tackle_gains),
