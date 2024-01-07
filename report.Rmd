@@ -100,7 +100,7 @@ We train a model designed to predict the yards to be gained from which we can ca
 #### 2. Tackler Replacement Procedure 
 For each tackle, we systematically remove the closest defender at the moment of the tackle and replace the features with those of the second closest defender. Further on, we replace the second closest with the third closest, and so on. In this way, we come up with a prediction for a hypothetical "what if the tackle would be missed" scenario which then can be compared to the real existing tackle.
 
-#### 3. Yardline Prediction 
+#### 3. Yard line Prediction 
 Using the trained random forest, we predict the end-of-play yard line with 1000 trees. Using a kernel density estimator for visualization, we can plot the dynamically evolving conditional density estimation withing any given play.
 
 <span style="color: red;">For the purpose of illustration, we present a specific example play. The video below shows a successful passing play from the Detroit Lions against the Miami Dolphins. After a completed pass, the ball carrier (in this case Tight End TJ Hockenson) is able to gain a substantial amount of yards by evading a tackle and is finally stopped 12 yards before the endzone.  </span>
@@ -653,10 +653,12 @@ ggarrange(p1,p2,ncol = 2,nrow = 1)
 ```
 
 ## Discussion
-In this contribution, we developed the metric *PEP* for quantifying the value of tackles. It allows practitioners to assess players, particularly in terms of their tackling abilities. 
-<span style="color: red;">Ole fasst zusammen und sagt wie toll unser Model ist :-) < description</span>
+In this contribution, we developed the metric *PEP* for quantifying the value of tackles. It allows practitioners to assess players, particularly in terms of their tackling abilities. Our approach allows for within-play conditional density estimation of the end-of-play yard line which serves as a bases for the evaluation of tackle performance measured by *prevented expected points* by artificially removing the tackle from the data. Importantly, our method allows for the incorporation of prediction uncertainty (such as heteroscedasticity and multimodality), which would be lost when soley relying on point predictions. Therefore the uncertainty can propagate to the level of expected points, leading to an accurate quantification of prevented expected points by the tackle.
+
 However, there are some drawbacks that need to be taken into account during the evaluation process. One important consideration is the defensive playing style of teams. We have already seen that cornerbacks and safeties are often more likely to make "touchdown-saving tackles", so their scores tend to be higher. If safeties are also involved in riskier defensive strategies (e.g. in a Brian Flores defence) and therefore receive even less support from their teammates in the backfield, their values could increase even more. 
-Another area for future research is defensive turnovers. We neglected these plays in our analysis because their specific outcome was not compatible with our current EP model. In general, however, those tackles that lead to defensive turnovers are positive plays, for which players who often tackle *and* force the ball loose for a fumble (such as Haason Reddick) should be rewarded with extra-positive values.  
+
+Another area for future research is defensive turnovers. We neglected these plays in our analysis because their specific outcome was not compatible with our current EP model. In general, however, those tackles that lead to defensive turnovers are positive plays, for which players who often tackle *and* force the ball loose for a fumble (such as Haason Reddick) should be rewarded with extra-positive values. 
+
 In summary, the metrics we have developed can serve as an additional piece of the puzzle in the overall evaluation of (defensive) players, and may gain practical relevance in the process of scouting players and opponents.
 
 ## Code
