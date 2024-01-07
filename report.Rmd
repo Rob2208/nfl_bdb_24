@@ -59,17 +59,13 @@ Given the impracticability of such a hypothetical scenario, our approach involve
 
 To accurately predict the yard line at the end of any given play it is necessary to create several features derived from the tracking data. More specifically, we conducted the following feature preprocessing:
 
-#### Change of coordinate system
-We transformed the coordinate system by 
-
-* redefining the x-variable as the x-distance to the endzone (such that all play directions are from right to left and the relevant endzone is at zero),
-* centering the y-variable such that the center of the field is at zero,
-* changing the direction variable, such that zero degrees represents heading straight towards the relevant endzone.
-
 #### Response variable: Yards to be gained
 For each play, we define the x-position of the ball carrier in the last frame as the end-of-play yard line. The response variable we aim to predict is now *yards to be gained* as the difference of the x-position of the ball carrier in a given frame to the end-of-play yard line.
 
 #### Feature engineering
+
+Prior to more involved feature engeneering steps, we transformed the coordinate system by i) redefining the x-variable as the x-distance to the endzone (such that all play directions are from right to left and the relevant endzone is at zero), ii) centering the y-variable such that the center of the field is at zero and iii) changing the direction variable, such that zero degrees represents heading straight towards the corresponding endzone.
+
 For all players and the ball carrier we use the features already contained in the tracking data, namely x- and y-coordinates, speed, acceleration, distance covered, orientation and direction.
 
 For all players except the ball carrier we further compute the
