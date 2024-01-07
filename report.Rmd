@@ -804,15 +804,15 @@ All code for data preprocessing, model training, prediction and player evaluatio
 
 ## Appendix
 
-### Data preprocessing & feature engeneering
+#### Data preprocessing & feature engeneering
 
-Prior to more involved feature engeneering steps, we transformed the coordinate system by i) redefining the x-variable as the x-distance to the endzone (such that all play directions are from right to left and the relevant endzone is at zero), ii) centering the y-variable such that the center of the field is at zero and iii) changing the direction variable, such that zero degrees represents heading straight towards the corresponding endzone.
+Prior to more involved feature engeneering steps, we transform the coordinate system by i) redefining the x-variable as the x-distance to the endzone (such that all play directions are from right to left and the relevant endzone is at zero), ii) centering the y-variable such that the center of the field is at zero and iii) changing the direction variable, such that zero degrees represents heading straight towards the corresponding endzone.
 
 For the identification of tackle events we consider the frame in which the distance of the tackler (whom we derive from the tackle event data set) to the ball carrier is minimal within a given play. 
 
 As we evaluate tackles by comparing a hypothetical outcome to the true end-of-play yard line, it is not reasonable to include every tackle play for the final evaluation. We exclude all plays with penalties, as this affects the final yard line of the play. Furthermore, we currently also remove tackle plays which led to defensive turnovers as well as plays where the discrepancy between forward progress and final position of the ball carrier is large (> 2 yards). Although tackles made in such plays may be valuable, our framework is at the moment not able to handle them appropriately. 
 
-### Model training & evaluation
+#### Model training & evaluation
 
 Considering memory restrictions we conduct the following training and test procedure: We train one model on the data of weeks one to four resulting in an RMSE of 5.864 and MAE of 3.212 when predicting weeks five to nine. To check for robustness and to obtain an out-of-bag prediction for every tackle, we train a second model on weeks seven to nine. We evaluate this model on weeks one to six, yielding an RMSE of 5.931 and MAE of 3.210. Due to the similarity in model performance, it is evident that a subset of the full data set already allows for sufficient stability.
 
