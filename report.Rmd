@@ -48,44 +48,7 @@ Although this citation from one of the most successful head coaches in the histo
 When assessing players' tackles, one is usually interested in a hypothetical scenario: the potential outcome if a player were to miss a tackle. 
 Essentially, this involves quantifying the yards saved by a defensive player. Ideally, albeit impractically, running a play twice --- once with the defense player executing the tackle and a second time without --- would allow a direct comparison of the yardage gained by the ball carrier, thus enabling to evaluate the impact of the defensive player's tackle.
 
-Given the impracticability of such a hypothetical scenario, our approach involves approximating it by predicting the yard line of the ongoing play twice. First, we consider the inclusion of the closest defender who executed the tackle, and in a next step, we exclude this player. However, only quantifying the yards saved by a particular tackle does not suffice as an adequate measure of tackle value, due to lack of interpretability on a scale truly relevant to the game outcome. Therefore, we aim to produce a measure of tackle value on the scale of expected points (EP). EP can be viewed as a complicated mapping of the end of play yard line to the expected points in the next play. A sole point prediction of the mean yard line misses uncertainty propagation to the EP scale, such that we aim to produce a full conditional density estimate to calculate the expected points from. The metric derived from this methodology then quantifies the *prevented expected points (PEP)*.
-
-<!-- We will find that such density estimates often show multimodality, which is especially relevant when large yards gained have a strong effect on the expected points. -->
-
-<!-- Based on these predicted yardlines, we compute the expected points (EP) gained through the tackle. This approach enables us to evaluate players in terms of the importance of their tacklings. -->
-
-
-## Data
-
-To accurately predict the yard line at the end of any given play it is necessary to create several features derived from the tracking data. More specifically, we conducted the following feature preprocessing:
-
-#### Response variable: Yards to be gained
-For each play, we define the x-position of the ball carrier in the last frame as the end-of-play yard line. The response variable we aim to predict is now *yards to be gained* as the difference of the x-position of the ball carrier in a given frame to the end-of-play yard line.
-
-#### Feature engineering
-
-Prior to more involved feature engeneering steps, we transformed the coordinate system by i) redefining the x-variable as the x-distance to the endzone (such that all play directions are from right to left and the relevant endzone is at zero), ii) centering the y-variable such that the center of the field is at zero and iii) changing the direction variable, such that zero degrees represents heading straight towards the corresponding endzone.
-
-For all players and the ball carrier we use the features already contained in the tracking data, namely x- and y-coordinates, speed, acceleration, distance covered, orientation and direction.
-
-For all players except the ball carrier we further compute the
-
-* euclidean distance to the ball carrier,
-* x-distance to the ball carrier,
-* y-distance to the ball carrier.
-
-For defensive players only, we additionally compute the absolute difference of the defender's direction and the angle of the shortest segment between the defender and the ball carrier.
-
-Subsequently, we order all players (in each frame) with respect to their euclidean distance to the ball carrier and standardize all features.
-
-For the identification of tackle events, we do not rely on the event column. Instead, we define as the tackle event the frame in which the distance of the tackler (whom we derive from the tackle event data set) to the ball carrier is minimal within a given play. 
-
-As we evaluate tackles by comparing a hypothetical outcome to the true end of play yard line, it is not reasonable to include every tackle play for the final evaluation. We exclude all plays with penalties, as this affects the final yard line of the play. Furthermore, we currently also remove tackle plays which led to defensive turnovers as well as plays where the discrepancy between forward progress and final position of the ball carrier is big. Although tackles made in such plays may be valuable, our framework is at the moment not able to handle them appropriately. 
-
-<span style="color: red;">Schreiben welche plays wir rausgenommen haben und warum. Ja, würde ich kurz</span>
-
-<span style="color: red;">...add an example play to illustrate the "what if" scenario...
-Hier die end of play yardline und "yards to be gained" einzeichnen.</span>
+Given the impracticability of such a hypothetical scenario, our approach involves approximating it by predicting the yard line of the ongoing play twice. First, we consider the inclusion of the closest defender who executed the tackle (left panel of the below figure), and in a next step, we exclude this player (right panel of the below figure). However, only quantifying the yards saved by a particular tackle does not suffice as an adequate measure of tackle value, due to lack of interpretability on a scale truly relevant to the game outcome. Therefore, we aim to produce a measure of tackle value on the scale of expected points (EP). EP can be viewed as a complicated mapping of the end-of-play yard line to the expected points in the next play. A sole point prediction of the mean yard line misses uncertainty propagation to the EP scale, such that we aim to produce a full conditional density estimate to calculate the expected points from. The metric derived from this methodology then quantifies the *prevented expected points (PEP)*.
 
 ```{r plot_ex, fig.height=6, fig.width= 12, echo = FALSE}
 
@@ -140,16 +103,16 @@ segments(x0 = tackle_info$true_yardline,
          y0 = 53.3/2,
          x1 = tackle_info$true_yardline,
          y1 = -53.3/2,
-         col = coleop,lty = 2)
+         col = "black", lty = 1, lwd = 2)
 
 segments(x0 = tackle_info$true_yardline,
          y0 = tackle_frame$y_bc,
          x1 = tackle_frame$x_bc,
          y1 = tackle_frame$y_bc,
          lty = 2)
-text(x = tackle_frame$x_bc+2,y = tackle_frame$y_bc-4,"yards to be gained",cex = 0.5,pos = 1)
+text(x = tackle_frame$x_bc+2,y = tackle_frame$y_bc-4,"yards to be gained", cex = 1, pos = 1)
 arrows(tackle_frame$x_bc+2,tackle_frame$y_bc-4.5,
-       tackle_frame$x_bc-4,tackle_frame$y_bc,angle = 20,length =0.1,lwd = 0.5)
+       tackle_frame$x_bc-4,tackle_frame$y_bc-0.5, angle = 20, length = 0.1, lwd = 1)
 
 for(j in 2:11){
   points(tackle_frame[,paste0("x_or_off", j)], tackle_frame[, paste0("y_or_off", j)], pch = 20, col = coloff)
@@ -158,6 +121,8 @@ for(j in 2:11){
   points(tackle_frame[,paste0("x_or_def", j)], tackle_frame[, paste0("y_or_def", j)], pch = 20, col = coldef)
 }
 points(tackle_frame[,paste0("x_or_def", 1)], tackle_frame[, paste0("y_or_def", 1)], pch = 6, lwd = 3, col = coldef)
+
+legend(x = 31, y = -21, bty = "n", lwd = 2, lty = 1, legend = c("true EOP yard line"))
 
 plot(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = coloff, 
      xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)), ylim = c(-53.3/2, 53.3/2+5), 
@@ -193,21 +158,39 @@ segments(x0 = 6,
          x1 = 6,
          y1 = -53.3/2,
          col = coleop,lty = 2)
-text(x = 6, y = 0-10, "?",cex = 1.5,lwd = 2, pos = 4)
+#text(x = 6, y = 0-10, "?",cex = 1.5,lwd = 2, pos = 4)
 
 segments(x0 = 0,
          y0 = 53.3/2,
          x1 = 0,
          y1 = -53.3/2,
          col = coleop,lty = 2)
-text(x = 0, y = 0, "?",cex = 1.5,lwd = 2, pos = 4)
+#text(x = 0, y = 0, "?",cex = 1.5,lwd = 2, pos = 4)
 
 segments(x0 = 14,
          y0 = 53.3/2,
          x1 = 14,
          y1 = -53.3/2,
          col = coleop,lty = 2)
-text(x = 14, y = 0+15, "?",cex = 1.5,lwd = 2, pos = 4)
+#text(x = 14, y = 0+15, "?",cex = 1.5,lwd = 2, pos = 4)
+
+segments(x0 = 7,
+         y0 = 53.3/2,
+         x1 = 7,
+         y1 = -53.3/2,
+         col = coleop,lty = 2)
+
+segments(x0 = 10,
+         y0 = 53.3/2,
+         x1 = 10,
+         y1 = -53.3/2,
+         col = coleop,lty = 2)
+
+segments(x0 = 3,
+         y0 = 53.3/2,
+         x1 = 3,
+         y1 = -53.3/2,
+         col = coleop,lty = 2)
 
 for(j in 2:11){
   points(tackle_frame[,paste0("x_or_off", j)], tackle_frame[, paste0("y_or_off", j)], pch = 20, col = coloff)
@@ -216,30 +199,38 @@ for(j in 1:10){
   points(tackle_frame[,paste0("x_or_def", j+1)], tackle_frame[, paste0("y_or_def", j+1)], pch = 20, col = coldef)
 }
 
-
-
+legend(x = 23, y = -21, bty = "n", lwd = 1, lty = 2, col = coleop, legend = c("hypothetical EOP yard lines"))
 ```
 
+## Data
+
+To accurately predict the yard line at the end of any given play it is necessary to create several features derived from the tracking data. More specifically, we conducted the following feature preprocessing:
+
+#### Response variable: Yards to be gained
+For each play, we define the x-position of the ball carrier in the last frame as the end-of-play yard line. The response variable we aim to predict is *yards to be gained*, defined as the difference of the x-position of the ball carrier in a given frame to the end-of-play yard line.
+
+#### Feature engineering
+
+For all players and the ball carrier we use the features already contained in the tracking data, namely x- and y-coordinates, speed, acceleration, distance covered, orientation and direction. Except for the ball carrier we further compute the euclidean distance, x-distance and y-distance to the ball carrier. For defensive players only, we additionally compute the absolute difference of the defender's direction and the angle of the shortest segment between the defender and the ball carrier. Subsequently, we order all players (in each frame) with respect to their euclidean distance to the ball carrier and standardize all features.
+
+More details regarding data preprocessing can be found in the Appendix.
 
 ## Analysis
 
 Our analysis comprises four steps:
 
 #### 1. Model Training
-We train a model designed to predict the yards to be gained from which we can calculate the end-of-play yard line (see Yurko et al., 2020). The model uses the previously described features, only including the ten closest defenders and should account for potential non-linear and interaction effects. The time-series nature of the data suggests the usage of deep learning architectures such as transformers or LSTMs. However, we aim to go beyond point estimates for the yard line at the end of the play. Hence, we set up a conditional density estimator $\hat{f}(y \mid x)$ which allows for adequate uncertainty propagation in the following steps. Thus, we opt for a middle-ground solution between accuracy in mean prediction and uncertainty quantification and consider a random forest comprising 1000 individual trees. Especially in our use case, modeling the uncertainty is important as the variance of the end-of-play yard line differs substantially between varying game situations. 
+We train a model designed to predict the *yards to be gained* from which we can calculate the end-of-play yard line (see Yurko et al., 2020). The model uses the previously described features, only including the ten closest defenders and should account for potential non-linear and interaction effects. The time-series nature of the data suggests the usage of deep learning architectures such as transformers or LSTMs which, however, lack uncertainty quantification. Though, here, modeling the uncertainty is important as the variance of the end-of-play yard line differs substantially between varying game situations. Thus, we set up a conditional density estimator $\hat{f}(y \mid x)$ and opt for a middle-ground solution between accuracy in mean prediction and uncertainty quantification and consider a random forest comprising 1000 individual trees.
 
-<span style="color: red;">RMSE und MAE reporten. 
-RMSE (Model week 1-4 OOS): 5.864, MAE (Model week 1-4 OOS): 3.212
-RMSE (Model week 7-9 OOS): 5.931, MAE (Model week 7-9 OOS): 3.210
-</span>
+Details on the training and testing procedure as well as model evaluation can be found in the Appendix.
 
 #### 2. Tackler Replacement Procedure 
 For each tackle, we systematically remove the closest defender at the moment of the tackle and replace the features with those of the second closest defender. Further on, we replace the second closest with the third closest, and so on. In this way, we come up with a prediction for a hypothetical "what if the tackle would be missed" scenario which then can be compared to the real existing tackle.
 
 #### 3. Yard Line Prediction 
-Using the trained random forest, we predict the end-of-play yard line with 1000 trees. Using a kernel density estimator for visualization, we can plot the dynamically evolving conditional density estimate withing any given play.
+Using the trained random forest, we predict the end-of-play yard line with 1000 trees. Using a kernel density estimator for visualization, we can plot the dynamically evolving conditional density estimate within any given play.
 
-<span style="color: red;">For the purpose of illustration, we present a specific example play. The video below shows a successful passing play from the Detroit Lions against the Miami Dolphins. After a completed pass, the ball carrier (in this case Tight End TJ Hockenson) is able to gain a substantial amount of yards by evading a tackle and is finally stopped 12 yards before the endzone.  </span>
+For the purpose of illustration, we present a specific example play. The video below shows a successful passing play from the Detroit Lions against the Miami Dolphins. After a completed pass, the ball carrier (in this case tight end T.J. Hockenson) is able to gain a substantial amount of yards by evading a tackle and is finally stopped at the 12-yard line.
 
 <center>
 <video width="600" height="400" controls>
@@ -247,9 +238,7 @@ Using the trained random forest, we predict the end-of-play yard line with 1000 
 </video>
 </center>
 
-<span style="color: red;"> Below we display an animation of that same play (in the transformed coordinate system). At each frame, we add the conditional density of the yards to be gained from our model. There are a few observations: First, at beginning of the play the density is rather narrow, because the model expects a tackle from the closest defender. As soon as TJ Hockenson is able to evade the first tackle, the density changes. The variance of the yards to be gained distribution increases and we even observe a bimodal distribution with a lot of mass at the endzone. Finally, at the time of tackle the distribution becomes narrow again, as we expect the runner to make only a few more yards.</span>
-
-<span style="color: red;"> Formulierung in obigen text sollte noch verbessert werden. War nur ein erster Ansatz< description</span>
+Below we display an animation of that same play (in the transformed coordinate system). At each frame, we add the conditional density of the *yards to be gained* from our model. There are a few observations: First, at the beginning of the play the density is concentrated, because the model expects a tackle from the closest defender. As soon as T.J. Hockenson is able to evade the first tackle, the density changes. The distribution's variance increases and we even observe bimodality with a lot of mass at the endzone. Finally, at the time of tackle the distribution narrows again, as we expect the runner to make only a few more yards.
 
 ```{r animation, fig.show='animate', ffmpeg.format='gif', dev='jpeg', echo = FALSE,fig.width= 8,fig.height=8,fig.align='center',interval = 0.4}
 library(scales)
@@ -356,8 +345,6 @@ for(i in 1:(nrow(pred)-7)){
 }
 
 ```
-
-<span style="color: red;">Zwischenzeitliche Bimodalität, Heteroskedastizität gut zu sehen in Anmiation.</span>
 
 For the tackle frames in particular, we obtain one predictive density, based on the original features, and one based on the replacement procedure explained above.
 
@@ -568,16 +555,16 @@ vis_tackle_plays3(gpId,coldens,collos,coleop,coloff,coldef)
 From a mathematical perspective, we want to obtain the mean expected points, given the conditional distribution of the end-of-play yard line produced by our random forest. More formally, letting the mapping $g$ represent the calculation of expected points based on the end-of-play yard line $Y$ we are interested in
 
 $$
-\text{E}(g(Y) \mid x) = \int_{0}^{100} g(y) \: \hat{f} (y \mid x) \: dy
+\text{E}(g(Y) \mid x) = \int g(y) \: \hat{f} (y \mid x) \: dy
 $$
-For the mapping $g$ we set up our own EP model based on an XGBoost architecture (Chen and Guestrin, 2016) which, after model training, can be used to calculate the expected points. In essence, we follow the implementation of the EP model from the nflfastR package (Carl and Baldwin, 2023). However, we have to derive all features used in the model solely from the predicted yards to be gained of each play which makes using the model from the nflfastR package impractical. As features for our model we employ the yard line of the play (adjusted LOS), yards to go, down, quarter, a home team indicator and timeouts remaining for each team (we omit features such as half seconds remaining, which are not extractable from the predicted yards to be gained).  <span style="color: red;">Wenn gewünscht kann ich noch Model comparisons (MAE oder so) vom unserem Modell zum Modell von nflfastR angeben. Um zu zeigen, dass unser Modell ähnlich gut funktioniert. RM: Ich glaube sowas ist gut für den Appendix.</span>    
+For the mapping $g$ we set up our own EP model based on an XGBoost architecture (Chen and Guestrin, 2016) which, after model training, can be used to calculate the expected points. In essence, we follow the implementation of the EP model from the nflfastR package (Carl and Baldwin, 2023). However, we have to derive all features used in the model solely from the predicted *yards to be gained* of each play which makes using the model from the nflfastR package impractical. As features for our model we employ the yard line of the play (adjusted LOS), yards to go, down, quarter, a home team indicator and timeouts remaining for each team (we omit features such as half seconds remaining, which are not extractable from the predicted *yards to be gained*).
 
 Instead of a two-step procedure, first obtaining a kernel density estimate from the individual tree predictions (introducing subjectivity in bandwidth choice) and then integrating numerically, we treat the tree-predictions $\hat{y}_1, \dots, \hat{y}_{1000}$ as samples from the conditional density and approximate the above expectation via the Monte Carlo estimate
 $$
 \frac{1}{1000} \sum_{i=1}^{1000} g(\hat{y}_i).
 $$
 
-A metric for quantifying tackle value can now be obtained in two ways. First, the hypothetical mean expected points can be compared to the mean expected points based on the predicted conditional density using the original features, i.e.
+A metric for quantifying tackle value can now be obtained in two ways. First, the hypothetical mean expected points can be compared to the mean expected points based on the predicted conditional density using the original features, i.e.,
 $$
 \text{PEP}_1 = \text{E}(g(Y) \mid x_{removed}) - \text{E}(g(Y) \mid x_0),
 $$
@@ -586,11 +573,9 @@ $$
 \text{PEP}_2 = \text{E}(g(Y) \mid x_{removed}) - g(y_0).
 $$
 
-$\text{PEP}_1$ is similar to what is regarded a treatment effect in the literature representing the average expected points prevented by the tackle, given the specific game situation. In contrast, $\text{PEP}_2$ quantifies the prevented expected points by a real observed tackle. This is relevant for e.g. player evaluation as players might over- or underperform.  <span style="color: red;">Text überarbeiten?.</span>
+$\text{PEP}_1$ is similar to what is regarded a treatment effect in the literature representing the average expected points prevented by the tackle, given the specific game situation. In contrast, $\text{PEP}_2$ quantifies the prevented expected points by a real observed tackle. This is relevant for, e.g., player evaluation as some players might over- or underperform in comparison to the model prediction.
 
-<span style="color: red;">Wir müssten zumindest noch kurz auf Training und Test set eingehen, oder?.</span>
-
-The below Figure See Figure \@ref(fig:overview). summarizes the above steps. 
+The below figure summarizes the above steps. 
 
 ```{r overview, fig.align = 'center', fig.cap = "Graphical overview of the steps of our analysis.", warning=FALSE, message=FALSE,echo = FALSE}
 knitr::include_graphics("plots/PEP_pipeline.jpg")
@@ -598,7 +583,7 @@ knitr::include_graphics("plots/PEP_pipeline.jpg")
 
 ## Player evaluation
 
-In this section we evaluate the *PEP* values at a player level for the test data. In particular, we calculate for each player his cumulative $\text{PEP}_1$ and $\text{PEP}_2$ and display these together with the average $\text{PEP}_1$ and $\text{PEP}_2$ per tackle. To get a reasonable average for these, we set the minimum number of tackles to ten. Users are then invited to compare players by selecting different teams and clicking on different positions.
+In this section we evaluate the *PEP* values at a player level. In particular, we calculate for each player his cumulative $\text{PEP}_1$ and $\text{PEP}_2$ and display these together with the average $\text{PEP}_1$ and $\text{PEP}_2$ per tackle. To get a reliable average for these, we set the minimum number of tackles to ten. Users are then invited to compare players by selecting different teams and clicking on different positions.
 
 ```{r players, echo = FALSE, warning=FALSE, message=FALSE}
 
@@ -692,28 +677,28 @@ tbl <- reactable(crosstalk_data,
     ),
     n_tackles = colDef(
       name = "# Tackles",
-      maxWidth = 50
+      maxWidth = 80
     ),
     sum_tackle_gains = colDef(
-      name = "PEP[1]",
+      name = "Sum PEP[1]",
       format = colFormat(digits = 2),
       style = color_scales(best_tacklers_u, color_ref = "col1"),
       maxWidth = 80
     ),
     sum_tackle_gains2 = colDef(
-      name = "PEP[2]",
+      name = "Sum PEP[2]",
       format = colFormat(digits = 2),
       style = color_scales(best_tacklers_u, color_ref = "col2"),
       maxWidth = 80
     ),
     avg_per_tackle = colDef(
-      name = "Avg PEP[1]/Tackle",
+      name = "Avg PEP[1]",
       format = colFormat(digits = 2),
       style = color_scales(best_tacklers_u, color_ref = "col3"),
       maxWidth = 80
     ),
     avg_per_tackle2 = colDef(
-      name = "Avg PEP[2]/Tackle",
+      name = "Avg PEP[2]",
       format = colFormat(digits = 2),
       style = color_scales(best_tacklers_u, color_ref = "col4"),
       maxWidth = 80
@@ -734,7 +719,7 @@ div(tbl)
 
 ```
 
-When comparing players in the above table across different positions, it quickly becomes apparent that, for example, defensive tackles do not have similar *PEP* values to safeties. So we want to compare the cumulative $\text{PEP}_2$ of players at the same position with players at other positions. In doing so, we can see in the lower left graph that some positions, as already indicated above, turn out to be low *PEP* positions. This is mainly due to the fact that defensive ends, nose tackles or defensive tackles are protected by linebackers, safeties and cornerbacks. On the other hand, inside linebackers have the highest *PEP* values. This is due to the fact that players in this position tackle the most. Comparing the average *PEP* per position in the bottom right graph, we can see that inside linebackers fall in the order of importance and are overtaken by cornerbacks and safeties. This can be explained by considering that they are often the last to tackle, before the opposing players gain many yards or even score a TD.  
+When comparing players in the above table across different positions, it quickly becomes apparent that, for example, defensive tackles do not have similar *PEP* values to safeties. So we want to compare the cumulative $\text{PEP}_2$ of players at the same position with players at other positions. In doing so, we can see in the lower left density plot that some positions, as already indicated above, turn out to be low *PEP* positions. This is mainly due to the fact that defensive ends, nose tackles or defensive tackles are protected by linebackers, safeties and cornerbacks. On the other hand, inside linebackers have the highest *PEP* values as those players tackle the most. Comparing the average *PEP* per position in the bottom right density plot, we can see that inside linebackers fall in the order of importance and are overtaken by cornerbacks and safeties. This can be explained by considering that they are often the last to tackle before the opposing players gain many yards or even score a touchdown.  
 
 ```{r pos, fig.height=6, fig.width= 10, echo = FALSE, warning=FALSE, message=FALSE}
 
@@ -797,11 +782,13 @@ ggarrange(p1,p2,ncol = 2,nrow = 1)
 ```
 
 ## Discussion
-In this contribution, we developed the metric *PEP* for quantifying the value of tackles. It allows practitioners to assess players, particularly in terms of their tackling abilities. Our approach allows for within-play conditional density estimation of the end-of-play yard line which serves as a bases for the evaluation of tackle performance measured by *prevented expected points* by artificially removing the tackle from the data. Importantly, our method allows for the incorporation of prediction uncertainty (such as heteroscedasticity and multimodality), which would be lost when soley relying on point predictions. Therefore the uncertainty can propagate to the level of expected points, leading to an accurate quantification of prevented expected points by the tackle.
+In this contribution, we developed the metric *PEP* for quantifying the value of tackles. It allows practitioners to assess players, particularly in terms of their tackling abilities. Our approach allows for within-play conditional density estimation of the end-of-play yard line which serves as a bases for the evaluation of tackle performance measured by *prevented expected points* by artificially removing the tackler from the data. Importantly, our method incorporates distributional information, i.e., heteroscedasticity and multimodality, which would be lost when solely relying on point predictions. Therefore, the uncertainty can propagate to the level of expected points, leading to an accurate quantification of expected points prevented by the tackle.
 
-However, there are some drawbacks that need to be taken into account during the evaluation process. One important consideration is the defensive playing style of teams. We have already seen that cornerbacks and safeties are often more likely to make "touchdown-saving tackles", so their scores tend to be higher. If safeties are also involved in riskier defensive strategies (e.g. in a Brian Flores defence) and therefore receive even less support from their teammates in the backfield, their values could increase even more. 
+However, there are some drawbacks that need to be taken into account during the evaluation process. One important consideration is the defensive playing style of teams. We have already seen that cornerbacks and safeties are often more likely to make "touchdown-saving tackles", so their scores tend to be higher. If safeties are also involved in riskier defensive strategies (e.g., in a Brian Flores defence) and therefore receive less support from their teammates in the backfield, their values could increase even more. 
 
-Another area for future research is defensive turnovers. We neglected these plays in our analysis because their specific outcome was not compatible with our current EP model. In general, however, those tackles that lead to defensive turnovers are positive plays, for which players who often tackle *and* force the ball loose for a fumble (such as Haason Reddick) should be rewarded with extra-positive values. 
+Another area for future research is defensive turnovers. We neglected these plays in our analysis because their specific outcome was not compatible with our current EP model. In general, however, tackles that lead to defensive turnovers are valuable plays, for which players who often tackle *and* force the ball loose for a fumble (such as Haason Reddick) should be rewarded with extra-positive values. 
+
+Furthermore, the metric can potentially be used to evaluate offensive player performances. In particular, our models could identify efficient ball carriers who do not lose many EPs by being tackled.
 
 In summary, the metrics we have developed can serve as an additional piece of the puzzle in the overall evaluation of (defensive) players, and may gain practical relevance in the process of scouting players and opponents.
 
@@ -814,4 +801,19 @@ All code for data preprocessing, model training, prediction and player evaluatio
 * Carl S, Baldwin B (2023). nflfastR: Functions to Efficiently Access NFL Play by Play Data. R package version 4.6.0.9000, https://github.com/nflverse/nflfastR, https://www.nflfastr.com/.
 * Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. In Proceedings of the 22nd acm sigkdd international conference on knowledge discovery and data mining (pp. 785-794).
 * Yurko, R., Matano, F., Richardson, L. F., Granered, N., Pospisil, T., Pelechrinis, K., & Ventura, S. L. (2020). Going deep: models for continuous-time within-play valuation of game outcomes in American football with tracking data. Journal of Quantitative Analysis in Sports, 16(2), 163-182.
+
+## Appendix
+
+### Data preprocessing & feature engeneering
+
+Prior to more involved feature engeneering steps, we transformed the coordinate system by i) redefining the x-variable as the x-distance to the endzone (such that all play directions are from right to left and the relevant endzone is at zero), ii) centering the y-variable such that the center of the field is at zero and iii) changing the direction variable, such that zero degrees represents heading straight towards the corresponding endzone.
+
+For the identification of tackle events we consider the frame in which the distance of the tackler (whom we derive from the tackle event data set) to the ball carrier is minimal within a given play. 
+
+As we evaluate tackles by comparing a hypothetical outcome to the true end-of-play yard line, it is not reasonable to include every tackle play for the final evaluation. We exclude all plays with penalties, as this affects the final yard line of the play. Furthermore, we currently also remove tackle plays which led to defensive turnovers as well as plays where the discrepancy between forward progress and final position of the ball carrier is large (> 2 yards). Although tackles made in such plays may be valuable, our framework is at the moment not able to handle them appropriately. 
+
+### Model training & evaluation
+
+Considering memory restrictions we conduct the following training and test procedure: We train one model on the data of weeks one to four resulting in an RMSE of 5.864 and MAE of 3.212 when predicting weeks five to nine. To check for robustness and to obtain an out-of-bag prediction for every tackle, we train a second model on weeks seven to nine. We evaluate this model on weeks one to six, yielding an RMSE of 5.931 and MAE of 3.210. Due to the similarity in model performance, it is evident that a subset of the full data set already allows for sufficient stability.
+
 
