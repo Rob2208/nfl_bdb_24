@@ -22,7 +22,7 @@ library(ggridges)
 pbp_data_bdb <- read.csv("data/plays.csv") %>% 
   mutate(uId = paste(gameId,playId,sep = "_"))
 
-tackle_list <- readRDS("data/tackles_info_data_full_oos.rds")
+tackle_list <- readRDS("data/tackles_info_data_full_oos2.rds")
 
 tackles <- tackle_list[[1]]
 tackle_info_real2 <- tackle_list[[2]]
@@ -95,7 +95,10 @@ Our analysis comprises four steps:
 #### 1. Model Training
 We train a model designed to predict the yards to be gained from which we can calculate the end-of-play yard line (see Yurko et al., 2020). The model uses the previously described features, only including the ten closest defenders and should account for potential non-linear and interaction effects. The time-series nature of the data suggests the usage of deep learning architectures such as transformers or LSTMs. However, we aim to go beyond point estimates for the yard line at the end of the play. Hence, we set up a conditional density estimator $\hat{f}(y \mid x)$ which allows for adequate uncertainty propagation in the following steps. Thus, we opt for a middle-ground solution between accuracy in mean prediction and uncertainty quantification and consider a random forest comprising 1000 individual trees. Especially in our use case, modeling the uncertainty is important as the variance of the end-of-play yard line differs substantially between varying game situations. 
 
-<span style="color: red;">RMSE und MAE reporten.</span>
+<span style="color: red;">RMSE und MAE reporten. 
+RMSE (Model week 1-4 OOS): 5.864, MAE (Model week 1-4 OOS): 3.212
+RMSE (Model week 7-9 OOS): 5.931, MAE (Model week 7-9 OOS): 3.210
+</span>
 
 #### 2. Tackler Replacement Procedure 
 For each tackle, we systematically remove the closest defender at the moment of the tackle and replace the features with those of the second closest defender. Further on, we replace the second closest with the third closest, and so on. In this way, we come up with a prediction for a hypothetical "what if the tackle would be missed" scenario which then can be compared to the real existing tackle.
