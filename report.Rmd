@@ -121,8 +121,14 @@ for(j in 2:11){
   points(tackle_frame[,paste0("x_or_def", j)], tackle_frame[, paste0("y_or_def", j)], pch = 20, col = coldef)
 }
 points(tackle_frame[,paste0("x_or_def", 1)], tackle_frame[, paste0("y_or_def", 1)], pch = 6, lwd = 3, col = coldef)
+points(tackle_frame$x_football, tackle_frame$y_football, pch = 9, col = "coral1", lwd = 1)
 
-legend(x = 31, y = -21, bty = "n", lwd = 2, lty = 1, legend = c("true EOP yard line"))
+legend(x = 21, y = -16, bty = "n", 
+       lwd = c(2,1,6,3,1,1), lty = c(1,NA,NA,NA,NA,NA),
+       pch = c(NA,20,1,6,20,9),
+       col = c("black",coloff,coloff,coldef,coldef,"coral1"),
+       ncol = 2,
+       legend = c("true EOP yard line","Off","Ball carrier","Tackler","Def","Football"))
 
 plot(tackle_frame$x_bc, tackle_frame$y_bc, pch = 1, lwd = 6, col = coloff, 
      xlim = c(0,min(round(max(tackle_frame$x_bc),-1)+30,100)), ylim = c(-53.3/2, 53.3/2+5), 
@@ -198,8 +204,15 @@ for(j in 2:11){
 for(j in 1:10){
   points(tackle_frame[,paste0("x_or_def", j+1)], tackle_frame[, paste0("y_or_def", j+1)], pch = 20, col = coldef)
 }
+points(tackle_frame$x_football, tackle_frame$y_football, pch = 9, col = "coral1", lwd = 1)
 
-legend(x = 23, y = -21, bty = "n", lwd = 1, lty = 2, col = coleop, legend = c("hypothetical EOP yard lines"))
+legend(x = 21, y = -16, bty = "n", lwd = 1, lty = 2, col = coleop, legend = c("hypothetical EOP yard lines"))
+legend(x = 22, y = -19, bty = "n", 
+       lwd = c(1,6,1,1), lty = c(NA,NA,NA,NA),
+       pch = c(20,1,20,9),
+       col = c(coloff,coloff,coldef,"coral1"),
+       ncol = 2,
+       legend = c("Off","Ball carrier","Def","Football"))
 ```
 
 ## Data
@@ -238,7 +251,7 @@ For the purpose of illustration, we present a specific example play. The video b
 </video>
 </center>
 
-Below we display an animation of that same play (in the transformed coordinate system). At each frame, we add the conditional density of the *yards to be gained* from our model. There are a few observations: First, at the beginning of the play the density is concentrated, because the model expects a tackle from the closest defender. As soon as T.J. Hockenson is able to evade the first tackle, the density changes. The distribution's variance increases and we even observe bimodality with a lot of mass at the endzone. Finally, at the time of tackle the distribution narrows again, as we expect the runner to make only a few more yards.
+Below we display an animation of that same play (in the transformed coordinate system, see Appendix). At each frame, we add the conditional density of the *yards to be gained* from our model. There are a few observations: First, at the beginning of the play the density is concentrated, because the model expects a tackle from the closest defender. As soon as T.J. Hockenson is able to evade the first tackle, the density changes. The distribution's variance increases and we even observe bimodality with a lot of mass at the endzone. Finally, at the time of tackle the distribution narrows again, as we expect the runner to make only a few more yards.
 
 ```{r animation, fig.show='animate', ffmpeg.format='gif', dev='jpeg', echo = FALSE,fig.width= 8,fig.height=8,fig.align='center',interval = 0.4}
 library(scales)
@@ -719,7 +732,7 @@ div(tbl)
 
 ```
 
-When comparing players in the above table across different positions, it quickly becomes apparent that, for example, defensive tackles do not have similar *PEP* values to safeties. So we want to compare the cumulative $\text{PEP}_2$ of players at the same position with players at other positions. In doing so, we can see in the lower left density plot that some positions, as already indicated above, turn out to be low *PEP* positions. This is mainly due to the fact that defensive ends, nose tackles or defensive tackles are protected by linebackers, safeties and cornerbacks. On the other hand, inside linebackers have the highest *PEP* values as those players tackle the most. Comparing the average *PEP* per position in the bottom right density plot, we can see that inside linebackers fall in the order of importance and are overtaken by cornerbacks and safeties. This can be explained by considering that they are often the last to tackle before the opposing players gain many yards or even score a touchdown.  
+When comparing players in the above table across different positions, it quickly becomes apparent that, for example, defensive tackles do not have similar *PEP* values to safeties. So we want to compare the cumulative $\text{PEP}_2$ of players at the same position with players at other positions. In doing so, we can see in the lower left density plot that some positions, as already indicated above, turn out to be low *PEP* positions. This is mainly due to the fact that defensive ends, nose tackles or defensive tackles are protected by linebackers, safeties and cornerbacks. On the other hand, inside linebackers have the highest cumulative *PEP* values as those players tackle the most. Comparing the average *PEP* per position in the bottom right density plot, we can see that inside linebackers fall in the order of importance and are overtaken by cornerbacks and safeties. This can be explained by considering that they are often the last to tackle before the opposing players gain many yards or even score a touchdown.  
 
 ```{r pos, fig.height=6, fig.width= 10, echo = FALSE, warning=FALSE, message=FALSE}
 
