@@ -2,8 +2,8 @@
 # PEP: A metric for evaluating tackles
 
 This is the github repository for the corresponding submission to the
-NFL Big Data Bowl 2024 competition on Kaggle. The original notebook can
-be viewed
+NFL Big Data Bowl 2024 competition on Kaggle. The full notebook can be
+viewed
 [here](https://www.kaggle.com/code/robbwu/pep-a-metric-for-evaluating-tackles).
 
 ## Quick Summary
